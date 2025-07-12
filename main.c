@@ -31,22 +31,24 @@ int main() {
     printf("어떤 기준으로 선택할까요? (1: 입구 근처, 2: 출구 근처, 3: 마트 출입구 근처): ");
     scanf("%d", &user_preference[1]);
 
-    // 4. 메인 루프 (실제 시스템에서는 RTOS의 태스크로 각 모듈이 실행됨)
+    // 4. 서버와 통신해 비어있는 주차 구역 정보 받아오기
+
+    // 5. 메인 루프 (실제 시스템에서는 RTOS의 태스크로 각 모듈이 실행됨)
     int count = 0; // 루프 실행 횟수 (디버깅용)
     while(1){
         printf("\n\n<< %d 번째 수행 >>\n", ++count);
 
-        // 4-1. 현재 위치 업데이트
+        // 5-1. 현재 위치 업데이트
         // position[0] = 58, position[1] = 25; // 입구 (디버깅용)
         update_current_position(position);
 
-        // 4-2. 최적의 주차 공간 탐색 및 경로 계획 (goal, path 전역변수에 저장 후 경로의 길이를 반환)
+        // 5-2. 최적의 주차 공간 탐색 및 경로 계획 (goal, path 전역변수에 저장 후 경로의 길이를 반환)
         int path_length = path_planning(position, user_preference, map_matrix, map_rows, map_cols, goal, path);
 
-        // 4-3. 목적지 출력 (GUI로 대체)
+        // 5-3. 목적지 출력 (GUI로 대체)
         printf("추천 목적지: (%d, %d)\n", goal[0], goal[1]);
 
-        // 4-4. 경로 출력 (GUI로 대체)
+        // 5-4. 경로 출력 (GUI로 대체)
         printf("path_length: %d\n", path_length);
         printf("경로 안내:\n");
         for(int i = 0; i < path_length; i++) {
@@ -61,7 +63,7 @@ int main() {
         if(quit == 'y') break;
     }
 
-    // 5. 동적 할당된 메모리 해제
+    // 6. 동적 할당된 메모리 해제
     if (map_matrix != NULL) {
         printf("\n프로그램 종료 전, 마지막으로 사용한 맵의 메모리를 해제합니다.\n");
         free_map_copy(map_matrix, map_rows);
