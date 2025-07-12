@@ -77,7 +77,7 @@ static const InternalMapInfo all_maps[] = {
 
 int** create_map_copy(int lot_number, int* out_rows, int* out_cols) {
     int num_lots = sizeof(all_maps) / sizeof(all_maps[0]);
-    if (lot_number < 0 || lot_number >= num_lots) {
+    if (lot_number < 0 || lot_number > num_lots) {
         return NULL; // 유효하지 않은 lot 번호
     }
 
