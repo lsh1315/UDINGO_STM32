@@ -10,6 +10,7 @@ int lot_number;                     // 주차장 번호
 int **map_matrix = NULL;            // 주차장 지도 (동적 할당)
 int map_rows, map_cols;             // 지도의 행과 열 크기
 int **parking_spot = NULL;          // 주차 구역 좌표들
+int spot_num;                       // 주차 구역 개수
 int empty[ARRAY_CAPACITY];          // 빈 주차 공간 목록 (현재 사용되지 않음)
 int user_preference[2];             // 사용자 선호도 [주차 구역 유형, 기준]
 int position[2];                    // 현재 위치 [행, 열]
