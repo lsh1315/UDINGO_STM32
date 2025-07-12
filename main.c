@@ -49,7 +49,7 @@ int main() {
         printf("추천 목적지: (%d, %d)\n", goal[0], goal[1]);
 
         // 5-4. 경로 출력 (GUI로 대체)
-        printf("path_length: %d\n", path_length);
+        // printf("path_length: %d\n", path_length); // 디버깅용
         printf("경로 안내:\n");
         for(int i = 0; i < path_length; i++) {
             printf("(%d, %d) -> ", path[i][0], path[i][1]);
