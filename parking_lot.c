@@ -9,7 +9,7 @@ typedef struct {
     int cols;
     const int* map_data_ptr;
     int num_spot;
-    const int* empty_data_ptr;
+    const int* spot_data_ptr;
 } InternalMapInfo;
 
 // --- 원본 데이터 (static으로 완벽히 숨김) ---
@@ -76,7 +76,7 @@ static const int parking_lot_1_map[60][120] = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 };
 static const int parking_lot_1_parking_spot[14][2] = {
-    {1,2},{1,2},{1,2},{1,2},{1,2},{1,2},{1,2},{1,2},{1,2},{1,2},{1,2},{1,2},{1,2},{1,2}
+    {1,1},{1,2},{1,3},{1,4},{1,5},{1,6},{1,7},{1,8},{1,9},{1,10},{1,11},{1,12},{1,13},{1,14}
 };
 
 static const int parking_lot_2_map[8][4] = {
@@ -173,7 +173,7 @@ int** create_spot_copy(int lot_number, int* num) {
         }
         // 데이터 복사
         for (int c = 0; c < 2; c++) {
-            new_copy[r][c] = info->map_data_ptr[r * 2 + c];
+            new_copy[r][c] = info->spot_data_ptr[r * 2 + c];
         }
     }
 

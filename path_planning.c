@@ -12,41 +12,74 @@ typedef struct {
     int parent_y, parent_x;
 } Node;
 
-// --- 내부 헬퍼 함수 선언 ---
+// --- 헬퍼 함수 선언 (static 제거) ---
 static int heuristic(int y1, int x1, int y2, int x2);
-static void find_preferred_parking(const int* user_preference, int** map_matrix, int map_rows, int map_cols, int* goal_y, int* goal_x);
 static int reconstruct_path(Node** nodes, int current_y, int current_x, int path[][2], int map_cols);
-static int astar(int sy, int sx, int ty, int tx, int** map_matrix, int rows, int cols, int path[][2]);
 
-
-int path_planning(
-    const int* position,
+// find_preferred_parking 함수 정의 (static 제거 및 인자 추가)
+void find_preferred_parking(
     const int* user_preference,
     int** map_matrix,
     int map_rows,
     int map_cols,
-    int* goal,
-    int path[][2]
+    int** parking_spot,
+    int num_spot,
+    int* empty,
+    int* goal
 ) {
-    if (!position || !user_preference || !map_matrix || !goal || !path) {
-        return 0; // 유효성 검사
+    int preferred_type = user_preference[0];
+    int prefer_criteria = user_preference[1]; // 1: 입구 근처, 2: 출구 근처, 3: 마트 출입구 근처
+    
+    int min_dist = INF;
+    goal[0] = -1;
+    goal[1] = -1;
+
+    int exit_pos[2] = {-1, -1}, entry_pos[2] = {-1, -1}, mall_pos[2] = {-1, -1};
+
+    // 출구, 입구, 마트 출입구 위치 찾기
+    for (int r = 0; r < map_rows; r++) {
+        for (int c = 0; c < map_cols; c++) {
+            if (map_matrix[r][c] == 7) exit_pos[0] = r, exit_pos[1] = c; // 출구
+            if (map_matrix[r][c] == 6) entry_pos[0] = r, entry_pos[1] = c; // 입구
+            if (map_matrix[r][c] == 8) mall_pos[0] = r, mall_pos[1] = c; // 마트 출입구
+        }
     }
 
-    // 1. 최적의 주차 공간(목표 지점) 찾기
-    find_preferred_parking(user_preference, map_matrix, map_rows, map_cols, &goal[0], &goal[1]);
+    // parking_spot 배열을 순회하며 최적의 주차 공간 찾기
+    for (int i = 0; i < num_spot; i++) {
+        int spot_y = parking_spot[i][0];
+        int spot_x = parking_spot[i][1];
+        int spot_type = parking_spot[i][2]; // parking_spot 배열의 세 번째 요소가 주차 공간 유형이라고 가정
 
-    if (goal[0] == -1) {
-        return 0; // 적절한 주차 공간을 찾지 못함
+        // 비어있는지 확인 (empty 배열은 현재 사용되지 않으므로, 이 부분은 향후 구현 필요)
+        // if (empty[i] == 0) continue; // 비어있지 않으면 건너뛰기
+
+        if (spot_type == preferred_type) {
+            int dist = INF;
+            if (prefer_criteria == 1 && entry_pos[0] != -1) {
+                dist = heuristic(spot_y, spot_x, entry_pos[0], entry_pos[1]);
+            } else if (prefer_criteria == 2 && exit_pos[0] != -1) {
+                dist = heuristic(spot_y, spot_x, exit_pos[0], exit_pos[1]);
+            } else if (prefer_criteria == 3 && mall_pos[0] != -1) {
+                dist = heuristic(spot_y, spot_x, mall_pos[0], mall_pos[1]);
+            }
+
+            if (dist < min_dist) {
+                min_dist = dist;
+                goal[0] = spot_y;
+                goal[1] = spot_x;
+            }
+        }
     }
-
-    // 2. A* 알고리즘으로 경로 탐색 및 경로 길이 반환
-    return astar(position[0], position[1], goal[0], goal[1], map_matrix, map_rows, map_cols, path);
 }
 
+// astar 함수 정의 (static 제거 및 인자 변경)
+int astar(const int* start_pos, const int* target_pos, int** map_matrix, int rows, int cols, int path[][2]) {
+    int sy = start_pos[0];
+    int sx = start_pos[1];
+    int ty = target_pos[0];
+    int tx = target_pos[1];
 
-// --- 내부 헬퍼 함수 구현 ---
-
-static int astar(int sy, int sx, int ty, int tx, int** map_matrix, int rows, int cols, int path[][2]) {
     Node** nodes = (Node**)malloc(rows * sizeof(Node*));
     for(int i = 0; i < rows; i++) {
         nodes[i] = (Node*)malloc(cols * sizeof(Node));
@@ -125,55 +158,15 @@ static int heuristic(int y1, int x1, int y2, int x2) {
     return abs(y1 - y2) + abs(x1 - x2);
 }
 
-static void find_preferred_parking(const int* user_preference, int** map_matrix, int map_rows, int map_cols, int* goal_y, int* goal_x) {
-    int preferred_type = user_preference[0];
-    int prefer_exit = user_preference[1];
-    
-    int min_dist = INF;
-    *goal_y = -1;
-    *goal_x = -1;
-
-    int exit_pos[2] = {-1, -1}, entry_pos[2] = {-1, -1}, mall_pos[2] = {-1, -1};
-
-    for (int r = 0; r < map_rows; r++) {
-        for (int c = 0; c < map_cols; c++) {
-            if (map_matrix[r][c] == 7) exit_pos[0] = r, exit_pos[1] = c;
-            if (map_matrix[r][c] == 6) entry_pos[0] = r, entry_pos[1] = c;
-            if (map_matrix[r][c] == 8) mall_pos[0] = r, mall_pos[1] = c;
-        }
-    }
-
-    for (int r = 0; r < map_rows; r++) {
-        for (int c = 0; c < map_cols; c++) {
-            if (map_matrix[r][c] == preferred_type) {
-                int dist = INF;
-                if (prefer_exit == 1 && entry_pos[0] != -1) {
-                    dist = heuristic(r, c, entry_pos[0], entry_pos[1]);
-                } else if (prefer_exit == 2 && exit_pos[0] != -1) {
-                    dist = heuristic(r, c, exit_pos[0], exit_pos[1]);
-                } else if (prefer_exit == 3 && mall_pos[0] != -1) {
-                    dist = heuristic(r, c, mall_pos[0], mall_pos[1]);
-                }
-
-                if (dist < min_dist) {
-                    min_dist = dist;
-                    *goal_y = r;
-                    *goal_x = c;
-                }
-            }
-        }
-    }
-}
-
 static int reconstruct_path(Node** nodes, int current_y, int current_x, int path[][2], int map_cols) {
-    int temp_path[100][2];
+    int temp_path[ARRAY_CAPACITY][2]; // ARRAY_CAPACITY 사용
     int len = 0;
 
     int y = current_y;
     int x = current_x;
 
     while (y != -1 && x != -1) {
-        if (len >= 100) return 0; // 버퍼 오버플로우 방지
+        if (len >= ARRAY_CAPACITY) return 0; // 버퍼 오버플로우 방지
         temp_path[len][0] = y;
         temp_path[len][1] = x;
         len++;

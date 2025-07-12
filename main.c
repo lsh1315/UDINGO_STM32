@@ -3,55 +3,67 @@
 #include "path_planning.h"
 #include "position_detection.h"
 
-#define ARRAY_CAPACITY 100 // 경로 및 빈자리 배열의 최대 크기
+#define ARRAY_CAPACITY 100 // 경로 및 빈자리 배열의 최대 크기 정의
 
 // 전역 변수 선언
-int lot_number;                     // 주차장 번호
-int **map_matrix = NULL;            // 주차장 지도 (동적 할당)
-int map_rows, map_cols;             // 지도의 행과 열 크기
-int **parking_spot = NULL;          // 주차 구역 좌표들
-int spot_num;                       // 주차 구역 개수
-int empty[ARRAY_CAPACITY];          // 빈 주차 공간 목록 (현재 사용되지 않음)
-int user_preference[2];             // 사용자 선호도 [주차 구역 유형, 기준]
-int position[2];                    // 현재 위치 [행, 열]
-int path[ARRAY_CAPACITY][2];        // 계산된 경로
-int goal[2];                        // 목적지 주차 공간 [행, 열]
+int lot_number;                     // 현재 주차장 번호를 저장
+int **map_matrix = NULL;            // 주차장 지도를 나타내는 2D 배열 (동적 할당)
+int map_rows, map_cols;             // 주차장 지도의 행과 열 크기
+int **parking_spot = NULL;          // 주차 구역의 좌표들을 저장하는 2D 배열
+int num_spot;                       // 주차 구역의 총 개수
+int empty[ARRAY_CAPACITY];          // 현재 비어있는 주차 공간 목록 (현재 사용되지 않음)
+int user_preference[2];             // 사용자 선호도: [주차 구역 유형, 기준]
+                                    // 유형: 2(경차), 3(장애인), 4(일반), 5(전기차)
+                                    // 기준: 1(입구 근처), 2(출구 근처), 3(마트 출입구 근처)
+int position[2];                    // 현재 차량의 위치 [행, 열]
+int path[ARRAY_CAPACITY][2];        // A* 알고리즘으로 계산된 최적 경로를 저장하는 배열
+int goal[2];                        // 최종 목적지 주차 공간의 좌표 [행, 열]
 
 
 int main() {
     // 1. 주차장 식별
+    // 실제 시스템에서는 센서 등을 통해 주차장 번호를 자동으로 감지
     lot_number = 1; // 예시로 1번 주차장으로 설정
     printf("\n------------ 주차장이 감지되었습니다. UWB 기반 실내 내비게이션을 동작합니다. --------------\n\n");
     
     // 2. 주차장 지도 정보 로드
     // lot_number에 해당하는 주차장 지도를 동적으로 생성하고 map_matrix에 할당
+    // parking_lot.h에 정의된 함수를 사용하여 지도 및 주차 공간 정보 로드
     map_matrix = create_map_copy(lot_number, &map_rows, &map_cols);
+    parking_spot = create_spot_copy(lot_number, &num_spot);
 
     // 3. 사용자 선호도 입력 (향후 GUI로 대체될 부분)
+    // 사용자로부터 주차 구역 유형 및 선호 기준을 입력받음
     printf("주차 구역 유형을 선택하세요. (2: 경차, 3: 장애인, 4: 일반, 5: 전기차): ");
     scanf("%d", &user_preference[0]);
     printf("어떤 기준으로 선택할까요? (1: 입구 근처, 2: 출구 근처, 3: 마트 출입구 근처): ");
     scanf("%d", &user_preference[1]);
 
     // 4. 서버와 통신해 비어있는 주차 구역 정보 받아오기
+    // 이 부분은 현재 구현되지 않았으며, 향후 서버 연동 시 추가될 예정
 
-    // 5. 메인 루프 (실제 시스템에서는 RTOS의 태스크로 각 모듈이 실행됨)
-    int count = 0; // 루프 실행 횟수 (디버깅용)
+    // 5. 메인 루프 (실제 시스템에서는 RTOS의 태스크로 각 모듈이 주기적으로 실행됨)
+    int count = 0; // 루프 실행 횟수 (디버깅 및 테스트용)
     while(1){
         printf("\n\n<< %d 번째 수행 >>\n", ++count);
 
         // 5-1. 현재 위치 업데이트
-        // position[0] = 58, position[1] = 25; // 입구 (디버깅용)
+        // position_detection.h에 정의된 함수를 사용하여 현재 위치를 업데이트
+        // position[0] = 58, position[1] = 25; // 입구 (디버깅용: 특정 위치로 고정)
         update_current_position(position);
 
-        // 5-2. 최적의 주차 공간 탐색 및 경로 계획 (goal, path 전역변수에 저장 후 경로의 길이를 반환)
-        int path_length = path_planning(position, user_preference, map_matrix, map_rows, map_cols, goal, path);
+        // 5-2. 최적의 주차 공간 탐색 및 경로 계획
+        // find_preferred_parking: 사용자 선호도에 따라 최적의 빈 주차 공간(goal)을 탐색
+        // astar: 현재 위치(position)에서 목적지(goal)까지의 최적 경로(path)를 A* 알고리즘으로 계산
+        // 경로의 길이를 반환하며, goal과 path는 전역변수에 저장됨
+        find_preferred_parking(user_preference, map_matrix, map_rows, map_cols, parking_spot, num_spot, empty, goal);
+        int path_length = astar(position, goal, map_matrix, map_rows, map_cols, path);
 
-        // 5-3. 목적지 출력 (GUI로 대체)
+        // 5-3. 목적지 출력 (향후 GUI로 대체될 부분)
         printf("추천 목적지: (%d, %d)\n", goal[0], goal[1]);
 
-        // 5-4. 경로 출력 (GUI로 대체)
-        // printf("path_length: %d\n", path_length); // 디버깅용
+        // 5-4. 경로 출력 (향후 GUI로 대체될 부분)
+        // printf("path_length: %d\n", path_length); // 디버깅용: 경로 길이 출력
         printf("경로 안내:\n");
         for(int i = 0; i < path_length; i++) {
             printf("(%d, %d) -> ", path[i][0], path[i][1]);
@@ -66,9 +78,11 @@ int main() {
     }
 
     // 6. 동적 할당된 메모리 해제
+    // 프로그램 종료 전, 동적으로 할당된 지도 및 주차 공간 메모리를 해제하여 메모리 누수 방지
     if (map_matrix != NULL) {
         printf("\n프로그램 종료 전, 마지막으로 사용한 맵의 메모리를 해제합니다.\n");
         free_map_copy(map_matrix, map_rows);
+        free_spot_copy(parking_spot, num_spot);
     }
     
     return 0;
