@@ -125,9 +125,6 @@ void find_preferred_parking(
     int** map_matrix,
     int map_rows,
     int map_cols,
-    int** parking_spot,
-    int num_spot,
-    int* empty,
     int* goal
 ) {
     int preferred_type = user_preference[0];
@@ -146,25 +143,28 @@ void find_preferred_parking(
         }
     }
 
-    for (int i = 0; i < num_spot; i++) {
-        int y = parking_spot[i][0];
-        int x = parking_spot[i][1];
-        int type = parking_spot[i][2];
+    // 주차 공간을 map_matrix에서 직접 찾습니다.
+    for (int r = 0; r < map_rows; r++) {
+        for (int c = 0; c < map_cols; c++) {
+            int type = map_matrix[r][c];
+            // 주차 공간 타입 (예: 2, 3, 4, 5)에 따라 처리
+            if (type >= 2 && type <= 5) { // 가정: 2~5는 주차 공간 타입
+                if (type == preferred_type) {
+                    int dist = INF;
+                    if (prefer_criteria == 1 && entry_pos[0] != -1)
+                        dist = heuristic(r, c, entry_pos[0], entry_pos[1]);
+                    else if (prefer_criteria == 2 && exit_pos[0] != -1)
+                        dist = heuristic(r, c, exit_pos[0], exit_pos[1]);
+                    else if (prefer_criteria == 3 && mall_pos[0] != -1)
+                        dist = heuristic(r, c, mall_pos[0], mall_pos[1]);
 
-        if (type != preferred_type) continue;
-
-        int dist = INF;
-        if (prefer_criteria == 1 && entry_pos[0] != -1)
-            dist = heuristic(y, x, entry_pos[0], entry_pos[1]);
-        else if (prefer_criteria == 2 && exit_pos[0] != -1)
-            dist = heuristic(y, x, exit_pos[0], exit_pos[1]);
-        else if (prefer_criteria == 3 && mall_pos[0] != -1)
-            dist = heuristic(y, x, mall_pos[0], mall_pos[1]);
-
-        if (dist < min_dist) {
-            min_dist = dist;
-            goal[0] = y;
-            goal[1] = x;
+                    if (dist < min_dist) {
+                        min_dist = dist;
+                        goal[0] = r;
+                        goal[1] = c;
+                    }
+                }
+            }
         }
     }
 }

@@ -20,9 +20,6 @@ void find_preferred_parking(
     int** map_matrix,
     int map_rows,
     int map_cols,
-    int** parking_spot,
-    int num_spot,
-    int* empty,
     int* goal
 );
 
