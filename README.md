@@ -1,4 +1,4 @@
-# UDINGO_STM#@
+# UDINGO_STM32
 
 ## 빌드 및 실행 방법
 
