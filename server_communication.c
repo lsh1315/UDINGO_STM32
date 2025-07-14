@@ -24,7 +24,7 @@ static int non_empty_spot[MAX_PARKING_SPOT][2];
 static int Non_empty_spot_download(char *response) {
     // TODO: 실제 AWS 서버에 request를 보내고 response를 수신하는 로직 구현 필요
     // 현재는 디버깅을 위해 하드코딩된 문자열을 사용합니다.
-    sprintf(response, "30,17;42,15;17,102;42,104;");
+    sprintf(response, "30,17;42,15;17,102;");
     return 1; // 성공적으로 응답을 받았다고 가정
 }
 

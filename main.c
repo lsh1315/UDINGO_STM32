@@ -60,11 +60,8 @@ int main() {
         find_preferred_parking(user_preference, map_matrix, map_rows, map_cols, goal);
         path_length = astar(position, goal, map_matrix, map_rows, map_cols, path);
 
-        // 5-3. 목적지 출력 (향후 GUI로 대체될 부분)
+        // 5-3. 결과 출력 (향후 GUI로 대체될 부분)
         printf("추천 목적지: (%d, %d)\n", goal[0], goal[1]);
-
-        // 5-4. 경로 출력 (향후 GUI로 대체될 부분)
-        // printf("path_length: %d\n", path_length); // 디버깅용: 경로 길이 출력
         printf("경로 안내:\n");
         for(int i = 0; i < path_length; i++) {
             printf("(%d, %d) -> ", path[i][0], path[i][1]);
