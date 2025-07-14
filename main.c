@@ -2,6 +2,7 @@
 #include "parking_lot.h" 
 #include "path_planning.h"
 #include "position_detection.h"
+#include "server_communication.h"
 
 #define ARRAY_CAPACITY 100 // 경로 및 빈자리 배열의 최대 크기 정의
 
@@ -9,8 +10,6 @@
 int lot_number;                     // 현재 주차장 번호를 저장
 int **map_matrix = NULL;            // 주차장 지도를 나타내는 2D 배열 (동적 할당)
 int map_rows, map_cols;             // 주차장 지도의 행과 열 크기
-int **parking_spot = NULL;          // 주차 구역의 좌표들을 저장하는 2D 배열
-int num_spot;                       // 주차 구역의 총 개수
 int user_preference[2];             // 사용자 선호도: [주차 구역 유형, 기준]
                                     // 유형: 2(경차), 3(장애인), 4(일반), 5(전기차)
                                     // 기준: 1(입구 근처), 2(출구 근처), 3(마트 출입구 근처)
@@ -30,7 +29,6 @@ int main() {
     // lot_number에 해당하는 주차장 지도를 동적으로 생성하고 map_matrix에 할당
     // parking_lot.h에 정의된 함수를 사용하여 지도 및 주차 공간 정보 로드
     map_matrix = create_map_copy(lot_number, &map_rows, &map_cols);
-    parking_spot = create_spot_copy(lot_number, &num_spot);
 
     // 3. 사용자 선호도 입력 (향후 GUI로 대체될 부분)
     // 사용자로부터 주차 구역 유형 및 선호 기준을 입력받음
@@ -40,7 +38,10 @@ int main() {
     scanf("%d", &user_preference[1]);
 
     // 4. 서버와 통신해 비어있는 않은 주차 구역 정보 받아오기 --> 해당 좌표 벽(1)으로 
-    // 이 부분은 현재 구현되지 않았으며, 향후 서버 연동 시 추가될 예정
+    if(update_parking_occupancy(map_matrix) != 1){
+        printf("서버 통신 실패");
+        return 0;
+    }
 
     // 5. 메인 루프 (실제 시스템에서는 RTOS의 태스크로 각 모듈이 주기적으로 실행됨)
     int count = 0; // 루프 실행 횟수 (디버깅 및 테스트용)
@@ -82,7 +83,6 @@ int main() {
     if (map_matrix != NULL) {
         printf("\n프로그램 종료 전, 마지막으로 사용한 맵의 메모리를 해제합니다.\n");
         free_map_copy(map_matrix, map_rows);
-        free_spot_copy(parking_spot, num_spot);
     }
     
     return 0;

@@ -1,6 +1,6 @@
 CC = gcc
 TARGET = main_program
-SRCS = path_planning.c parking_lot.c position_detection.c main.c
+SRCS = path_planning.c parking_lot.c position_detection.c server_communication.c main.c
 OBJS = $(SRCS:.c=.o)
 
 all: $(TARGET)
