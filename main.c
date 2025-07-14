@@ -16,6 +16,7 @@ int user_preference[2];             // 사용자 선호도: [주차 구역 유�
                                     // 기준: 1(입구 근처), 2(출구 근처), 3(마트 출입구 근처)
 int position[2];                    // 현재 차량의 위치 [행, 열]
 int path[ARRAY_CAPACITY][2];        // A* 알고리즘으로 계산된 최적 경로를 저장하는 배열
+int path_length;                    // 최적 경로의 길이
 int goal[2];                        // 최종 목적지 주차 공간의 좌표 [행, 열]
 
 
@@ -56,7 +57,7 @@ int main() {
         // astar: 현재 위치(position)에서 목적지(goal)까지의 최적 경로(path)를 A* 알고리즘으로 계산
         // 경로의 길이를 반환하며, goal과 path는 전역변수에 저장됨
         find_preferred_parking(user_preference, map_matrix, map_rows, map_cols, goal);
-        int path_length = astar(position, goal, map_matrix, map_rows, map_cols, path);
+        path_length = astar(position, goal, map_matrix, map_rows, map_cols, path);
 
         // 5-3. 목적지 출력 (향후 GUI로 대체될 부분)
         printf("추천 목적지: (%d, %d)\n", goal[0], goal[1]);
