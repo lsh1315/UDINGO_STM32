@@ -1,9 +1,3 @@
-/**
- * @file server_communication.c
- * @brief 서버와 통신하여 주차장 점유 정보를 받아오고, 이를 내부 맵에 반영하는 기능을 담당합니다.
- * @date 2025-07-14
- */
-
 #include <stdio.h>
 #include <stdlib.h> // for malloc, free, atoi
 #include <string.h> // for strcpy, strtok, strlen

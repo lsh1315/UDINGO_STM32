@@ -1,5 +1,3 @@
-#include "position_detection.h"
-
 #include <stdio.h>
 #include <math.h>
 

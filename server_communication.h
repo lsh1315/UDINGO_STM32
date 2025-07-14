@@ -1,9 +1,3 @@
-/**
- * @file server_communication.h
- * @brief 서버 통신 관련 함수의 선언을 포함하는 헤더 파일입니다.
- * @date 2025-07-14
- */
-
 #ifndef SERVER_COMMUNICATION_H
 #define SERVER_COMMUNICATION_H
 

@@ -1,8 +1,6 @@
 #ifndef PATH_PLANNING_H
 #define PATH_PLANNING_H
 
-#define ARRAY_CAPACITY 100 // 경로 및 빈자리 배열의 최대 크기 정의
-
 /**
  * @brief 주어진 조건으로 최적의 주차 공간을 찾습니다.
  *

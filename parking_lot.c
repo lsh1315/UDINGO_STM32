@@ -1,5 +1,3 @@
-#include "parking_lot.h"
-
 #include <stdio.h>
 #include <stdlib.h> // malloc, free를 위해 필수
 

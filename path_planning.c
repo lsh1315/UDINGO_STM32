@@ -1,9 +1,8 @@
-#include "path_planning.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h> // abs()를 위해 포함
 
+#define ARRAY_CAPACITY 100 // 경로 및 빈자리 배열의 최대 크기 정의
 #define INF 99999
 
 // ---------- 구조체 ----------
