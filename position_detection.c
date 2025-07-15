@@ -6,9 +6,9 @@
 int trilaterate(double distances[4], int position[2]) {
     // Anchor coordinates
     double x1 = 0, y1 = 0;
-    double x2 = 1200, y2 = 0;
-    double x3 = 0, y3 = 600;
-    double x4 = 1200, y4 = 600;
+    double x2 = 600, y2 = 0;
+    double x3 = 0, y3 = 1200;
+    double x4 = 600, y4 = 1200;
 
     double d1 = distances[0];
     double d2 = distances[1];
@@ -86,37 +86,12 @@ int trilaterate(double distances[4], int position[2]) {
 int update_current_position(int* position) {
     double distances[4];
 
-    printf("\n4개의 앵커로부터 태거까지의 거리 값을 입력하세요.\n");
+    distances[0] = 63.16;
+    distances[1] = 542.58;
+    distances[2] = 1176.43;
+    distances[3] = 1293.98;
 
-    printf("앵커 1 (0, 0)까지의 거리: ");
-    if (scanf("%lf", &distances[0]) != 1) {
-        printf("\n잘못된 입력입니다. 숫자 값을 입력해야 합니다.\n");
-        return 1;
-    }
-
-    printf("앵커 2 (1200, 0)까지의 거리: ");
-    if (scanf("%lf", &distances[1]) != 1) {
-        printf("\n잘못된 입력입니다. 숫자 값을 입력해야 합니다.\n");
-        return 1;
-    }
-
-    printf("앵커 3 (0, 600)까지의 거리: ");
-    if (scanf("%lf", &distances[2]) != 1) {
-        printf("\n잘못된 입력입니다. 숫자 값을 입력해야 합니다.\n");
-        return 1;
-    }
-
-    printf("앵커 4 (1200, 600)까지의 거리: ");
-    if (scanf("%lf", &distances[3]) != 1) {
-        printf("\n잘못된 입력입니다. 숫자 값을 입력해야 합니다.\n");
-        return 1;
-    }
-
-    if (trilaterate(distances, position)) {
-        printf("\n계산된 태거의 위치: (x=%d, y=%d)\n", position[0], position[1]);
-    } else {
-        printf("\n위치를 계산할 수 없습니다. 입력 값을 확인해주세요.\n");
-    }
+    trilaterate(distances, position);
 
     return 0;
 }

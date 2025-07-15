@@ -51,8 +51,8 @@ int main() {
 
         // 5-1. 현재 위치 업데이트
         // position_detection.h에 정의된 함수를 사용하여 현재 위치를 업데이트
-        position[0] = 58, position[1] = 25; // 입구 (디버깅용: 특정 위치로 고정)
-        // update_current_position(position);
+        // position[0] = 58, position[1] = 25;  // 입구 (디버깅용: 특정 위치로 고정)
+        update_current_position(position);      // 아직 앵커들과의 거리 고정 --> 입구 (uwb 통신 구현 예정)
 
         // 5-2. 최적의 주차 공간 탐색 및 경로 계획
         // find_preferred_parking: 사용자 선호도에 따라 최적의 빈 주차 공간(goal)을 탐색
