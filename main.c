@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include "parking_lot.h" 
 #include "path_planning.h"
 #include "position_detection.h"
@@ -8,7 +9,7 @@
 
 // 전역 변수 선언
 int lot_number;                     // 현재 주차장 번호를 저장
-int **map_matrix = NULL;            // 주차장 지도를 나타내는 2D 배열 (동적 할당)
+uint8_t **map_matrix = NULL;            // 주차장 지도를 나타내는 2D 배열 (동적 할당)
 int map_rows, map_cols;             // 주차장 지도의 행과 열 크기
 int user_preference[2];             // 사용자 선호도: [주차 구역 유형, 기준]
                                     // 유형: 2(경차), 3(장애인), 4(일반), 5(전기차)

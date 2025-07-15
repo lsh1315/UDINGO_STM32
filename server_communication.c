@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h> // for malloc, free, atoi
 #include <string.h> // for strcpy, strtok, strlen
+#include <stdint.h> // uint8_t 정의
 
 #define MAX_RESPONSE_SIZE 100
 #define MAX_PARKING_SPOT 100
@@ -18,7 +19,7 @@ static int non_empty_spot[MAX_PARKING_SPOT][2];
 static int Non_empty_spot_download(char *response) {
     // TODO: 실제 AWS 서버에 request를 보내고 response를 수신하는 로직 구현 필요
     // 현재는 디버깅을 위해 하드코딩된 문자열을 사용합니다.
-    sprintf(response, "30,17;42,15;17,102;");
+    sprintf(response, "30,17;42,15;17,102;42,104;");
     return 1; // 성공적으로 응답을 받았다고 가정
 }
 
@@ -69,7 +70,7 @@ static int Response_to_Coordinates(char* response, int array[MAX_PARKING_SPOT][2
  * @param spot_array 점유된 공간의 좌표 배열.
  * @param num 점유된 공간의 수.
  */
-static void replace_1_non_empty_spot(int** map, int spot_array[MAX_PARKING_SPOT][2], int num) {
+static void replace_1_non_empty_spot(uint8_t** map, int spot_array[MAX_PARKING_SPOT][2], int num) {
     for (int i = 0; i < num; i++) {
         int row = spot_array[i][0];
         int colum = spot_array[i][1];
@@ -83,7 +84,7 @@ static void replace_1_non_empty_spot(int** map, int spot_array[MAX_PARKING_SPOT]
  * @param map 업데이트할 주차장 맵 (2차원 배열).
  * @return 성공 시 1, 실패 시 0을 반환합니다.
  */
-int update_parking_occupancy(int **map) {
+int update_parking_occupancy(uint8_t **map) {
     if (Non_empty_spot_download(response) != 1) {
         return 0; // 서버로부터 데이터 다운로드 실패
     }

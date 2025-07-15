@@ -10,6 +10,6 @@
  * @param map 업데이트할 주차장 맵 (동적으로 할당된 2차원 배열).
  * @return 성공 시 1, 실패(서버 통신 오류, 메모리 할당 실패 등) 시 0을 반환합니다.
  */
-int update_parking_occupancy(int **map);
+int update_parking_occupancy(uint8_t **map);
 
 #endif // SERVER_COMMUNICATION_H

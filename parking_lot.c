@@ -1,17 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h> // malloc, free를 위해 필수
+#include <stdint.h> // uint8_t 정의
 
 // --- 내부 데이터 구조 (외부에 노출되지 않음) ---
 typedef struct {
     int rows;
     int cols;
-    const int* map_data_ptr;
-    int num_spot;
-    const int* spot_data_ptr;
+    const uint8_t* map_data_ptr;
 } InternalMapInfo;
 
 // --- 원본 데이터 (static으로 완벽히 숨김) ---
-static const int parking_lot_1_map[60][120] = {
+static const uint8_t parking_lot_1_map[60][120] = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -73,11 +72,8 @@ static const int parking_lot_1_map[60][120] = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 };
-static const int parking_lot_1_parking_spot[14][2] = {
-    {1,1},{1,2},{1,3},{1,4},{1,5},{1,6},{1,7},{1,8},{1,9},{1,10},{1,11},{1,12},{1,13},{1,14}
-};
 
-static const int parking_lot_2_map[8][4] = {
+static const uint8_t parking_lot_2_map[8][4] = {
     {1, 1, 1, 1},
     {1, 0, 0, 1},
     {1, 0, 0, 1},
@@ -87,18 +83,15 @@ static const int parking_lot_2_map[8][4] = {
     {1, 0, 0, 1},
     {1, 1, 1, 1}
 };
-static const int parking_lot_2_parking_spot[10][2] = {
-    {1,2},{1,2},{1,2},{1,2},{1,2},{1,2},{1,2},{1,2},{1,2},{1,2}
-};
 
 static const InternalMapInfo all_maps[] = {
-    {60, 120, (const int*)parking_lot_1_map, 14,(const int*)parking_lot_1_parking_spot},
-    {8, 4, (const int*)parking_lot_2_map, 10, (const int*)parking_lot_2_parking_spot}
+    {60, 120, (const uint8_t*)parking_lot_1_map},
+    {8, 4, (const uint8_t*)parking_lot_2_map}
 };
 
 // --- 외부에 공개되는 기능 함수들 ---
 
-int** create_map_copy(int lot_number, int* out_rows, int* out_cols) {
+uint8_t** create_map_copy(int lot_number, int* out_rows, int* out_cols) {
     int num_lots = sizeof(all_maps) / sizeof(all_maps[0]);
     if (lot_number < 0 || lot_number > num_lots) {
         return NULL; // 유효하지 않은 lot 번호
@@ -109,12 +102,12 @@ int** create_map_copy(int lot_number, int* out_rows, int* out_cols) {
     int cols = info->cols;
 
     // 1. 세로 (row) 포인터들을 담을 공간 할당
-    int** new_copy = (int**)malloc(rows * sizeof(int*));
+    uint8_t** new_copy = (uint8_t**)malloc(rows * sizeof(uint8_t*));
     if (new_copy == NULL) return NULL; // 메모리 할당 실패
 
     // 2. 각 가로 (col) 배열을 위한 공간을 할당하고 데이터 복사
     for (int r = 0; r < rows; r++) {
-        new_copy[r] = (int*)malloc(cols * sizeof(int));
+        new_copy[r] = (uint8_t*)malloc(cols * sizeof(uint8_t));
         if (new_copy[r] == NULL) {
             // 할당 실패 시, 그 전까지 할당된 모든 메모리를 해제해야 함
             for (int i = 0; i < r; i++) {
@@ -134,7 +127,7 @@ int** create_map_copy(int lot_number, int* out_rows, int* out_cols) {
     return new_copy;
 }
 
-void free_map_copy(int** map, int rows) {
+void free_map_copy(uint8_t** map, int rows) {
     if (map == NULL) return;
 
     // 각 row에 할당된 메모리를 먼저 해제
@@ -143,49 +136,4 @@ void free_map_copy(int** map, int rows) {
     }
     // row 포인터 배열 자체를 해제
     free(map);
-}
-
-int** create_spot_copy(int lot_number, int* num) {
-    int num_lots = sizeof(all_maps) / sizeof(all_maps[0]);
-    if (lot_number < 0 || lot_number > num_lots) {
-        return NULL; // 유효하지 않은 lot 번호
-    }
-
-    const InternalMapInfo* info = &all_maps[lot_number-1];
-    int num_spot = info->num_spot;
-
-    // 1. 세로 (row) 포인터들을 담을 공간 할당
-    int** new_copy = (int**)malloc(num_spot * sizeof(int*));
-    if (new_copy == NULL) return NULL; // 메모리 할당 실패
-
-    // 2. 각 가로 (col) 배열을 위한 공간을 할당하고 데이터 복사
-    for (int r = 0; r < num_spot; r++) {
-        new_copy[r] = (int*)malloc(2 * sizeof(int));
-        if (new_copy[r] == NULL) {
-            // 할당 실패 시, 그 전까지 할당된 모든 메모리를 해제해야 함
-            for (int i = 0; i < r; i++) {
-                free(new_copy[i]);
-            }
-            free(new_copy);
-            return NULL;
-        }
-        // 데이터 복사
-        for (int c = 0; c < 2; c++) {
-            new_copy[r][c] = info->spot_data_ptr[r * 2 + c];
-        }
-    }
-
-    *num = num_spot;
-    return new_copy;
-}
-
-void free_spot_copy(int** spot, int num) {
-    if (spot == NULL) return;
-
-    // 각 row에 할당된 메모리를 먼저 해제
-    for (int r = 0; r < num; r++) {
-        free(spot[r]);
-    }
-    // row 포인터 배열 자체를 해제
-    free(spot);
 }

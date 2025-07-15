@@ -15,7 +15,7 @@
  */
 void find_preferred_parking(
     const int* user_preference,
-    int** map_matrix,
+    uint8_t** map_matrix,
     int map_rows,
     int map_cols,
     int* goal
@@ -35,7 +35,7 @@ void find_preferred_parking(
 int astar(
     const int* start_pos,
     const int* target_pos,
-    int** map_matrix,
+    uint8_t** map_matrix,
     int rows,
     int cols,
     int path[][2]
