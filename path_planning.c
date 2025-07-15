@@ -132,7 +132,7 @@ void find_preferred_parking(
     int min_dist = INF;
     goal[0] = goal[1] = -1;
 
-    int entry_pos[2] = {-1, -1}, exit_pos[2] = {-1, -1}, mall_pos[2] = {-1, -1};
+    int entry_pos[2] = { -1, -1 }, exit_pos[2] = { -1, -1 }, mall_pos[2] = { -1, -1 };
 
     for (int r = 0; r < map_rows; r++) {
         for (int c = 0; c < map_cols; c++) {
@@ -141,7 +141,7 @@ void find_preferred_parking(
             if (map_matrix[r][c] == 8 && mall_pos[0] == -1) mall_pos[0] = r, mall_pos[1] = c;
         }
     }
-
+    int found_preferred = 0; // 경차/장애인 자리 다 찼을때 일반자리에서 찾게하는 로직위한 변수
     // 주차 공간을 map_matrix에서 직접 찾습니다.
     for (int r = 0; r < map_rows; r++) {
         for (int c = 0; c < map_cols; c++) {
@@ -149,6 +149,30 @@ void find_preferred_parking(
             // 주차 공간 타입 (예: 2, 3, 4, 5)에 따라 처리
             if (type >= 2 && type <= 5) { // 가정: 2~5는 주차 공간 타입
                 if (type == preferred_type) {
+                    int dist = INF;
+                    if (prefer_criteria == 1 && entry_pos[0] != -1)
+                        dist = heuristic(r, c, entry_pos[0], entry_pos[1]);
+                    else if (prefer_criteria == 2 && exit_pos[0] != -1)
+                        dist = heuristic(r, c, exit_pos[0], exit_pos[1]);
+                    else if (prefer_criteria == 3 && mall_pos[0] != -1)
+                        dist = heuristic(r, c, mall_pos[0], mall_pos[1]);
+
+                    if (dist < min_dist) {
+                        min_dist = dist;
+                        goal[0] = r;
+                        goal[1] = c;
+                        found_preferred = 1; // 경차/장애인 자리 다 찼을때 일반자리에서 찾게하는 로직위한 변수
+                    }
+                }
+            }
+        }
+    }
+    // 선호 주차 타입이 다 찼다면 일반 타입(4번) 중 추천
+    if (!found_preferred) {
+        min_dist = INF;
+        for (int r = 0; r < map_rows; r++) {
+            for (int c = 0; c < map_cols; c++) {
+                if (map_matrix[r][c] == 4) {
                     int dist = INF;
                     if (prefer_criteria == 1 && entry_pos[0] != -1)
                         dist = heuristic(r, c, entry_pos[0], entry_pos[1]);
