@@ -20,8 +20,8 @@ static int heuristic(int y1, int x1, int y2, int x2) {
 
 // ---------- 경로 재구성 ----------
 static int reconstruct_path(Node** nodes, int current_y, int current_x, uint8_t path[][2], uint8_t map_cols) {
-    int temp_path[ARRAY_CAPACITY][2];
-    int len = 0;
+    uint8_t temp_path[ARRAY_CAPACITY][2];
+    uint8_t len = 0;
     int y = current_y;
     int x = current_x;
 
