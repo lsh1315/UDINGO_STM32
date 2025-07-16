@@ -14,11 +14,11 @@
  * @param goal              [출력] 최종 목적지 좌표가 저장될 배열 [y, x]
  */
 void find_preferred_parking(
-    const int* user_preference,
+    const uint8_t* user_preference,
     uint8_t** map_matrix,
-    int map_rows,
-    int map_cols,
-    int* goal
+    uint8_t map_rows,
+    uint8_t map_cols,
+    uint8_t* goal
 );
 
 /**
@@ -33,12 +33,12 @@ void find_preferred_parking(
  * @return                  계산된 경로의 길이 (좌표 쌍의 개수). 경로를 찾지 못하면 0을 반환.
  */
 int astar(
-    const int* start_pos,
-    const int* target_pos,
+    const uint8_t* start_pos,
+    const uint8_t* target_pos,
     uint8_t** map_matrix,
-    int rows,
-    int cols,
-    int path[][2]
+    uint8_t rows,
+    uint8_t cols,
+    uint8_t path[][2]
 );
 
 #endif // PATH_PLANNING_H

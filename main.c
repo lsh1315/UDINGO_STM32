@@ -8,16 +8,16 @@
 #define ARRAY_CAPACITY 100 // 경로 및 빈자리 배열의 최대 크기 정의
 
 // 전역 변수 선언
-int lot_number;                     // 현재 주차장 번호를 저장
+uint8_t lot_number;                     // 현재 주차장 번호를 저장
 uint8_t **map_matrix = NULL;            // 주차장 지도를 나타내는 2D 배열 (동적 할당)
-int map_rows, map_cols;             // 주차장 지도의 행과 열 크기
-int user_preference[2];             // 사용자 선호도: [주차 구역 유형, 기준]
+uint8_t map_rows, map_cols;             // 주차장 지도의 행과 열 크기
+uint8_t user_preference[2];             // 사용자 선호도: [주차 구역 유형, 기준]
                                     // 유형: 2(경차), 3(장애인), 4(일반), 5(전기차)
                                     // 기준: 1(입구 근처), 2(출구 근처), 3(마트 출입구 근처)
-int position[2];                    // 현재 차량의 위치 [행, 열]
-int path[ARRAY_CAPACITY][2];        // A* 알고리즘으로 계산된 최적 경로를 저장하는 배열
-int path_length;                    // 최적 경로의 길이
-int goal[2];                        // 최종 목적지 주차 공간의 좌표 [행, 열]
+uint8_t position[2];                    // 현재 차량의 위치 [행, 열]
+uint8_t path[ARRAY_CAPACITY][2];        // A* 알고리즘으로 계산된 최적 경로를 저장하는 배열
+uint8_t path_length;                    // 최적 경로의 길이
+uint8_t goal[2];                        // 최종 목적지 주차 공간의 좌표 [행, 열]
 
 
 int main() {
@@ -34,9 +34,9 @@ int main() {
     // 3. 사용자 선호도 입력 (향후 GUI로 대체될 부분)
     // 사용자로부터 주차 구역 유형 및 선호 기준을 입력받음
     printf("주차 구역 유형을 선택하세요. (2: 경차, 3: 장애인, 4: 일반, 5: 전기차): ");
-    scanf("%d", &user_preference[0]);
+    scanf("%hhu", &user_preference[0]);
     printf("어떤 기준으로 선택할까요? (1: 입구 근처, 2: 출구 근처, 3: 마트 출입구 근처): ");
-    scanf("%d", &user_preference[1]);
+    scanf("%hhu", &user_preference[1]);
 
     // 4. 서버와 통신해 비어있는 않은 주차 구역 정보 받아오기 --> 해당 좌표 벽(1)으로 
     if(update_parking_occupancy(map_matrix) != 1){
@@ -47,7 +47,7 @@ int main() {
     // 5. 메인 루프 (실제 시스템에서는 RTOS의 태스크로 각 모듈이 주기적으로 실행됨)
     int count = 0; // 루프 실행 횟수 (디버깅 및 테스트용)
     while(1){
-        printf("\n\n<< %d 번째 수행 >>\n", ++count);
+        printf("\n\n<< %hhu 번째 수행 >>\n", ++count);
 
         // 5-1. 현재 위치 업데이트
         // position_detection.h에 정의된 함수를 사용하여 현재 위치를 업데이트
@@ -62,10 +62,10 @@ int main() {
         path_length = astar(position, goal, map_matrix, map_rows, map_cols, path);
 
         // 5-3. 결과 출력 (향후 GUI로 대체될 부분)
-        printf("추천 목적지: (%d, %d)\n", goal[0], goal[1]);
+        printf("추천 목적지: (%hhu, %hhu)\n", goal[0], goal[1]);
         printf("경로 안내:\n");
         for(int i = 0; i < path_length; i++) {
-            printf("(%d, %d) -> ", path[i][0], path[i][1]);
+            printf("(%hhu, %hhu) -> ", path[i][0], path[i][1]);
         }
         printf("도착!\n");
 

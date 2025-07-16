@@ -19,7 +19,7 @@ static int heuristic(int y1, int x1, int y2, int x2) {
 }
 
 // ---------- 경로 재구성 ----------
-static int reconstruct_path(Node** nodes, int current_y, int current_x, int path[][2], int map_cols) {
+static int reconstruct_path(Node** nodes, int current_y, int current_x, uint8_t path[][2], uint8_t map_cols) {
     int temp_path[ARRAY_CAPACITY][2];
     int len = 0;
     int y = current_y;
@@ -43,7 +43,7 @@ static int reconstruct_path(Node** nodes, int current_y, int current_x, int path
 }
 
 // ---------- A* 알고리즘 ----------
-int astar(const int* start_pos, const int* target_pos, uint8_t** map_matrix, int rows, int cols, int path[][2]) {
+int astar(const uint8_t* start_pos, const uint8_t* target_pos, uint8_t** map_matrix, uint8_t rows, uint8_t cols, uint8_t path[][2]) {
     int sy = start_pos[0];
     int sx = start_pos[1];
     int ty = target_pos[0];
@@ -121,11 +121,11 @@ int astar(const int* start_pos, const int* target_pos, uint8_t** map_matrix, int
 
 // ---------- 주차 자리 선택 ----------
 void find_preferred_parking(
-    const int* user_preference,
+    const uint8_t* user_preference,
     uint8_t** map_matrix,
-    int map_rows,
-    int map_cols,
-    int* goal
+    uint8_t map_rows,
+    uint8_t map_cols,
+    uint8_t* goal
 ) {
     int preferred_type = user_preference[0];
     int prefer_criteria = user_preference[1];

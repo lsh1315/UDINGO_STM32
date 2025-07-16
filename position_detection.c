@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <math.h>
+#include <stdint.h>
 
 // Function to calculate the position using trilateration
 // Returns 1 on success, 0 on failure
-int trilaterate(double distances[4], int position[2]) {
+int trilaterate(double distances[4], uint8_t position[2]) {
     // Anchor coordinates
     double x1 = 0, y1 = 0;
     double x2 = 600, y2 = 0;
@@ -83,7 +84,7 @@ int trilaterate(double distances[4], int position[2]) {
     return 1;
 }
 
-int update_current_position(int* position) {
+int update_current_position(uint8_t* position) {
     double distances[4];
 
     distances[0] = 63.16;

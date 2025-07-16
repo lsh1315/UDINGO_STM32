@@ -4,8 +4,8 @@
 
 // --- 내부 데이터 구조 (외부에 노출되지 않음) ---
 typedef struct {
-    int rows;
-    int cols;
+    uint8_t rows;
+    uint8_t cols;
     const uint8_t* map_data_ptr;
 } InternalMapInfo;
 
@@ -91,7 +91,7 @@ static const InternalMapInfo all_maps[] = {
 
 // --- 외부에 공개되는 기능 함수들 ---
 
-uint8_t** create_map_copy(int lot_number, int* out_rows, int* out_cols) {
+uint8_t** create_map_copy(uint8_t lot_number, uint8_t* out_rows, uint8_t* out_cols) {
     int num_lots = sizeof(all_maps) / sizeof(all_maps[0]);
     if (lot_number < 0 || lot_number > num_lots) {
         return NULL; // 유효하지 않은 lot 번호
@@ -127,7 +127,7 @@ uint8_t** create_map_copy(int lot_number, int* out_rows, int* out_cols) {
     return new_copy;
 }
 
-void free_map_copy(uint8_t** map, int rows) {
+void free_map_copy(uint8_t** map, uint8_t rows) {
     if (map == NULL) return;
 
     // 각 row에 할당된 메모리를 먼저 해제
