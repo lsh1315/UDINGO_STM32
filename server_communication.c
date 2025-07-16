@@ -2,13 +2,28 @@
 #include <stdlib.h> // for malloc, free, atoi
 #include <string.h> // for strcpy, strtok, strlen
 #include <stdint.h> // uint8_t 정의
-
-#define MAX_RESPONSE_SIZE 100
-#define MAX_PARKING_SPOT 100
+#include "main.h"
+#define MAX_RESPONSE_SIZE 50
+#define MAX_PARKING_SPOT 50
+#define BUF_SIZE 50
+#define WIFI_NSS_GPIO_Port GPIOA
+#define WIFI_NSS_Pin GPIO_PIN_11
 
 // 정적 전역 변수 선언
 static char response[MAX_RESPONSE_SIZE];
-static int non_empty_spot[MAX_PARKING_SPOT][2];
+static uint8_t non_empty_spot[MAX_PARKING_SPOT][2];
+static char spi_rx_buf[MAX_RESPONSE_SIZE];
+
+extern SPI_HandleTypeDef hspi2;
+extern UART_HandleTypeDef huart1;
+
+void wifi_send_at(const char *cmd, uint32_t delay_ms)
+{
+    memset(spi_rx_buf, 0, BUF_SIZE);
+    HAL_SPI_Transmit(&hspi2, (uint8_t *)cmd, strlen(cmd), 1000);
+    HAL_Delay(delay_ms);
+    HAL_SPI_Receive(&hspi2, (uint8_t *)spi_rx_buf, BUF_SIZE - 1, 5000);
+}
 
 /**
  * @brief 서버에 주차 공간 점유 정보를 요청하고 응답을 수신합니다.
@@ -16,12 +31,57 @@ static int non_empty_spot[MAX_PARKING_SPOT][2];
  * @param response 서버 응답을 저장할 버퍼에 대한 포인터입니다.
  * @return 성공 시 1, 실패 시 0을 반환합니다.
  */
-static int Non_empty_spot_download(char *response) {
-    // TODO: 실제 AWS 서버에 request를 보내고 response를 수신하는 로직 구현 필요
-    // 현재는 디버깅을 위해 하드코딩된 문자열을 사용합니다.
-    sprintf(response, "30,17;42,15;17,102;42,104;");
-    return 1; // 성공적으로 응답을 받았다고 가정
+static int Non_empty_spot_download(char *response) { // 여기 수정
+
+	// NSS (CS) LOW
+	HAL_GPIO_WritePin(WIFI_NSS_GPIO_Port, WIFI_NSS_Pin, GPIO_PIN_RESET);
+	memset(response, 0, BUF_SIZE);
+
+	    // 1️ AT 통신 확인
+	    wifi_send_at("AT\r\n", 100);
+	    HAL_UART_Transmit(&huart1, (uint8_t*)spi_rx_buf, strlen(spi_rx_buf),100);
+	    if (!strstr(spi_rx_buf, "OK")) return 0;
+
+	    // 2️ Wi-Fi 연결 (SSID, PASSWORD 변경 필요)
+	    wifi_send_at("AT+CWJAP=\"Desktopdy\",\"12345678\"\r\n", 3000);
+	    HAL_UART_Transmit(&huart1, (uint8_t*)"2", 2,100);
+	    if (!strstr(spi_rx_buf, "WIFI GOT IP")) return 0;
+
+	    // 3️⃣ TCP 연결 시작 (IP, PORT)
+	    wifi_send_at("AT+CIPSTART=\"TCP\",\"3.39.40.177\",5000\r\n", 300);
+	    HAL_UART_Transmit(&huart1, (uint8_t*)"3", 2,100);
+	    if (!strstr(spi_rx_buf, "OK")) return 0;
+
+	    // 4️⃣ HTTP GET 요청 길이 송신
+	    char http_request[] = "GET /occupied_string HTTP/1.1\r\nHost: 3.39.40.177\r\n\r\n";
+	    char at_cipsend[32];
+	    sprintf(at_cipsend, "AT+CIPSEND=%d\r\n", (int)strlen(http_request));
+	    wifi_send_at(at_cipsend, 100);
+	    HAL_UART_Transmit(&huart1, (uint8_t*)"4", 2,100);
+	    if (!strstr(spi_rx_buf, ">")) return 0;  // > 나오면 준비 완료
+
+	    // 5️⃣ HTTP GET 송신
+	    wifi_send_at(http_request, 500);
+	    // 6️⃣ 응답 수신 (spi_rx_buf 안에 +IPD 포함될 것)
+	    HAL_SPI_Receive(&hspi2, (uint8_t *)spi_rx_buf, BUF_SIZE - 1, 3000);
+
+	    // 7️⃣ +IPD 응답 파싱해서 response[] 저장
+	    char *start = strstr(spi_rx_buf, "+IPD,");
+	    if (start)
+	    {
+	        start = strchr(start, ':');
+	        if (start && *(start + 1) != '\0')
+	        {
+	            start++;
+	            strcpy(response, start);
+	        }
+	    }
+
+	    // 8️⃣ TCP 연결 종료
+	    wifi_send_at("AT+CIPCLOSE\r\n", 100);
+	    return 1;
 }
+
 
 /**
  * @brief "x1,y1;x2,y2;" 형식의 좌표 문자열을 2차원 정수 배열로 파싱합니다.
@@ -29,8 +89,8 @@ static int Non_empty_spot_download(char *response) {
  * @param array 파싱된 좌표를 저장할 2차원 배열입니다.
  * @return 파싱된 좌표 쌍의 개수를 반환합니다. 메모리 할당 실패 시 -1을 반환합니다.
  */
-static int Response_to_Coordinates(char* response, int array[MAX_PARKING_SPOT][2]) {
-    int i = 0;
+static int Response_to_Coordinates(char* response, uint8_t array[MAX_PARKING_SPOT][2]) {
+    uint8_t i = 0;
     // strtok_r은 스레드에 안전하며 중첩된 토큰화에 사용됩니다. 원본 문자열 수정을 방지하기 위해 복사본을 사용합니다.
     char* response_copy = malloc(strlen(response) + 1);
     if (response_copy == NULL) {
@@ -70,10 +130,10 @@ static int Response_to_Coordinates(char* response, int array[MAX_PARKING_SPOT][2
  * @param spot_array 점유된 공간의 좌표 배열.
  * @param num 점유된 공간의 수.
  */
-static void replace_1_non_empty_spot(uint8_t** map, int spot_array[MAX_PARKING_SPOT][2], int num) {
+static void replace_1_non_empty_spot(uint8_t** map, uint8_t spot_array[MAX_PARKING_SPOT][2], uint8_t num) {
     for (int i = 0; i < num; i++) {
-        int row = spot_array[i][0];
-        int colum = spot_array[i][1];
+        uint8_t row = spot_array[i][0];
+        uint8_t colum = spot_array[i][1];
         
         map[row][colum] = 1;
     }
@@ -89,7 +149,7 @@ int update_parking_occupancy(uint8_t **map) {
         return 0; // 서버로부터 데이터 다운로드 실패
     }
 
-    int num_non_empty = Response_to_Coordinates(response, non_empty_spot);
+    uint8_t num_non_empty = Response_to_Coordinates(response, non_empty_spot);
     if (num_non_empty < 0) {
         return 0; // 좌표 파싱 실패
     }
