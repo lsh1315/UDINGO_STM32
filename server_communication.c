@@ -6,82 +6,133 @@
 #define MAX_RESPONSE_SIZE 50
 #define MAX_PARKING_SPOT 50
 #define BUF_SIZE 50
-#define WIFI_NSS_GPIO_Port GPIOA
-#define WIFI_NSS_Pin GPIO_PIN_11
+
 
 // 정적 전역 변수 선언
+static char rx_buf[MAX_RESPONSE_SIZE];
 static char response[MAX_RESPONSE_SIZE];
 static uint8_t non_empty_spot[MAX_PARKING_SPOT][2];
-static char spi_rx_buf[MAX_RESPONSE_SIZE];
 
 extern SPI_HandleTypeDef hspi2;
 extern UART_HandleTypeDef huart1;
 
-void wifi_send_at(const char *cmd, uint32_t delay_ms)
+void wifi_nss_low(void)
 {
-    memset(spi_rx_buf, 0, BUF_SIZE);
-    HAL_SPI_Transmit(&hspi2, (uint8_t *)cmd, strlen(cmd), 1000);
-    HAL_Delay(delay_ms);
-    HAL_SPI_Receive(&hspi2, (uint8_t *)spi_rx_buf, BUF_SIZE - 1, 5000);
+    HAL_GPIO_WritePin(SPI2_NSS_GPIO_Port, SPI2_NSS_Pin, GPIO_PIN_RESET);
+}
+
+void wifi_nss_high(void)
+{
+    HAL_GPIO_WritePin(SPI2_NSS_GPIO_Port, SPI2_NSS_Pin, GPIO_PIN_SET);
+}
+
+void wifi_send_cmd_16bit(const char *cmd)
+{
+    uint8_t len = strlen(cmd);
+    uint8_t i = 0;
+
+    wifi_nss_low();
+
+    while (i < len)
+    {
+        uint8_t ch1 = cmd[i++];
+        uint8_t ch2 = (i < len) ? cmd[i++] : 0x15;  // 홀수 패딩
+        uint16_t word = (ch2 << 8) | ch1;
+        uint16_t resp = 0;
+        HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)&word, (uint8_t *)&resp, 1, HAL_MAX_DELAY);
+    }
+
+    wifi_nss_high();
+    HAL_Delay(10);
+}
+
+void wifi_receive_response_16bit(char *buf, uint16_t buf_len)
+{
+    uint8_t i = 0;
+
+    wifi_nss_low();
+    while (i < buf_len - 1)
+    {
+        uint16_t dummy = 0x0000;
+        uint16_t resp = 0;
+        HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)&dummy, (uint8_t *)&resp, 1, HAL_MAX_DELAY);
+
+        buf[i++] = resp & 0xFF;
+        if (i < buf_len - 1)
+            buf[i++] = (resp >> 8) & 0xFF;
+
+        if ((resp & 0xFF) == '>' || ((resp >> 8) & 0xFF) == '>')
+            break;
+    }
+    buf[i] = '\0';
+    wifi_nss_high();
+    HAL_Delay(10);
+}
+
+void wifi_wait_ready(void)
+{
+    while (HAL_GPIO_ReadPin(WIFI_DATRDY_GPIO_Port, WIFI_DATRDY_Pin) == GPIO_PIN_RESET);
 }
 
 /**
  * @brief 서버에 주차 공간 점유 정보를 요청하고 응답을 수신합니다.
- * @note 현재는 실제 서버 통신 대신 디버깅용 문자열을 사용합니다.
- * @param response 서버 응답을 저장할 버퍼에 대한 포인터입니다.
- * @return 성공 시 1, 실패 시 0을 반환합니다.
  */
-static int Non_empty_spot_download(char *response) { // 여기 수정
+static int Non_empty_spot_download(char *response)
+{
+    HAL_GPIO_WritePin(WIFI_RST_GPIO_Port, WIFI_RST_Pin, GPIO_PIN_RESET);
+    HAL_Delay(10);
+    HAL_GPIO_WritePin(WIFI_RST_GPIO_Port, WIFI_RST_Pin, GPIO_PIN_SET);
+    HAL_Delay(50);
 
-	// NSS (CS) LOW
-	HAL_GPIO_WritePin(WIFI_NSS_GPIO_Port, WIFI_NSS_Pin, GPIO_PIN_RESET);
-	memset(response, 0, BUF_SIZE);
+    HAL_GPIO_WritePin(WIFI_WKUP_GPIO_Port, WIFI_WKUP_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(WIFI_BOOT_GPIO_Port, WIFI_BOOT_Pin, GPIO_PIN_RESET);
+    HAL_Delay(100);
 
-	    // 1️ AT 통신 확인
-	    wifi_send_at("AT\r\n", 100);
-	    HAL_UART_Transmit(&huart1, (uint8_t*)spi_rx_buf, strlen(spi_rx_buf),100);
-	    if (!strstr(spi_rx_buf, "OK")) return 0;
+    wifi_wait_ready();
+    wifi_send_cmd_16bit("$$$\r");
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
-	    // 2️ Wi-Fi 연결 (SSID, PASSWORD 변경 필요)
-	    wifi_send_at("AT+CWJAP=\"Desktopdy\",\"12345678\"\r\n", 3000);
-	    HAL_UART_Transmit(&huart1, (uint8_t*)"2", 2,100);
-	    if (!strstr(spi_rx_buf, "WIFI GOT IP")) return 0;
+    wifi_wait_ready();
+	wifi_send_cmd_16bit("S1=10\r");
+	wifi_wait_ready();
+	wifi_receive_response_16bit(response, 128);
+	HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
-	    // 3️⃣ TCP 연결 시작 (IP, PORT)
-	    wifi_send_at("AT+CIPSTART=\"TCP\",\"3.39.40.177\",5000\r\n", 300);
-	    HAL_UART_Transmit(&huart1, (uint8_t*)"3", 2,100);
-	    if (!strstr(spi_rx_buf, "OK")) return 0;
+    wifi_wait_ready();
+    wifi_send_cmd_16bit("C1=iPhone_14_pro\r\n");
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
-	    // 4️⃣ HTTP GET 요청 길이 송신
-	    char http_request[] = "GET /occupied_string HTTP/1.1\r\nHost: 3.39.40.177\r\n\r\n";
-	    char at_cipsend[32];
-	    sprintf(at_cipsend, "AT+CIPSEND=%d\r\n", (int)strlen(http_request));
-	    wifi_send_at(at_cipsend, 100);
-	    HAL_UART_Transmit(&huart1, (uint8_t*)"4", 2,100);
-	    if (!strstr(spi_rx_buf, ">")) return 0;  // > 나오면 준비 완료
+    wifi_wait_ready();
+    wifi_send_cmd_16bit("C2=Dltmdgus13!\r\n");
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
-	    // 5️⃣ HTTP GET 송신
-	    wifi_send_at(http_request, 500);
-	    // 6️⃣ 응답 수신 (spi_rx_buf 안에 +IPD 포함될 것)
-	    HAL_SPI_Receive(&hspi2, (uint8_t *)spi_rx_buf, BUF_SIZE - 1, 3000);
+    wifi_wait_ready();
+    wifi_send_cmd_16bit("C3=4\r\n");
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
-	    // 7️⃣ +IPD 응답 파싱해서 response[] 저장
-	    char *start = strstr(spi_rx_buf, "+IPD,");
-	    if (start)
-	    {
-	        start = strchr(start, ':');
-	        if (start && *(start + 1) != '\0')
-	        {
-	            start++;
-	            strcpy(response, start);
-	        }
-	    }
+    wifi_wait_ready();
+    wifi_send_cmd_16bit("C4=1\r\n");
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
-	    // 8️⃣ TCP 연결 종료
-	    wifi_send_at("AT+CIPCLOSE\r\n", 100);
-	    return 1;
+    wifi_wait_ready();
+    wifi_send_cmd_16bit("C0\r\n");
+    HAL_Delay(3000);
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+
+    return 1;
 }
-
 
 /**
  * @brief "x1,y1;x2,y2;" 형식의 좌표 문자열을 2차원 정수 배열로 파싱합니다.
