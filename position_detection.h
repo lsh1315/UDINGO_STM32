@@ -7,7 +7,13 @@
  * @param position 계산된 x, y 좌표를 저장할 int형 배열 (크기 2)
  * @return 성공 시 1, 실패 시 0을 반환합니다.
  */
-int trilaterate(double distances[4], uint8_t position[2]);
+int trilaterate(int distances[4], uint8_t position[2]);
+
+/*
+ * @brief UWB 통신을 통해 거리 값을 받아옵니다.
+ * @param distances 4개의 앵커로부터의 거리 값을 담은 double형 배열
+ */
+int receive_dwm1000_distances(int distances[4]);
 
 /*
  * @brief UWB 통신을 통해 거리 값을 받아오고, 삼변측량을 통해 현재 위치를 계산하는 전체 과정을 포함하는 함수입니다.

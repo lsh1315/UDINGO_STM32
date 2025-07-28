@@ -1,10 +1,12 @@
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
 
 // Function to calculate the position using trilateration
 // Returns 1 on success, 0 on failure
-int trilaterate(double distances[4], uint8_t position[2]) {
+int trilaterate(int distances[4], uint8_t position[2]) {
     // Anchor coordinates
     double x1 = 0, y1 = 0;
     double x2 = 600, y2 = 0;
@@ -78,19 +80,34 @@ int trilaterate(double distances[4], uint8_t position[2]) {
     AtA_inv[1][1] = AtA[0][0] * inv_det;
 
     // position = AtA_inv * Atb
-    position[0] = round(AtA_inv[0][0] * Atb[0] + AtA_inv[0][1] * Atb[1]);
-    position[1] = round(AtA_inv[1][0] * Atb[0] + AtA_inv[1][1] * Atb[1]);
+    position[0] = (uint8_t)round((AtA_inv[0][0] * Atb[0] + AtA_inv[0][1] * Atb[1])/10); // mm to cm
+    position[1] = (uint8_t)round((AtA_inv[1][0] * Atb[0] + AtA_inv[1][1] * Atb[1])/10); // mm to cm
+
+    return 1;
+}
+
+int receive_dwm1000_distances(int distances[4]){
+    
+    // It will be replaced with UART Transceive
+    char str[] = "631,250,1114,949";
+
+    char *temp;
+    uint8_t i=0;
+    temp = strtok(str,",");
+    while(temp != NULL){
+        distances[i++] = atoi(temp);
+        temp = strtok(NULL,",");
+    }
 
     return 1;
 }
 
 int update_current_position(uint8_t* position) {
-    double distances[4];
+    int distances[4];
 
-    distances[0] = 63.16;
-    distances[1] = 542.58;
-    distances[2] = 1176.43;
-    distances[3] = 1293.98;
+    receive_dwm1000_distances(distances);
+    // Debuging
+    // printf("%dmm | %dmm | %dmm | %dmm \n",distances[0],distances[1],distances[2],distances[3]);
 
     trilaterate(distances, position);
 

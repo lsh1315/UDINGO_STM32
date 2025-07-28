@@ -62,6 +62,7 @@ int main() {
         path_length = astar(position, goal, map_matrix, map_rows, map_cols, path);
 
         // 5-3. 결과 출력 (향후 GUI로 대체될 부분)
+        printf("현재 위치: (%hhu, %hhu)\n", position[0], position[1]);
         printf("추천 목적지: (%hhu, %hhu)\n", goal[0], goal[1]);
         printf("경로 안내:\n");
         for(int i = 0; i < path_length; i++) {
