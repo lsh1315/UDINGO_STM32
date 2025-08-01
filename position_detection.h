@@ -19,6 +19,12 @@ int receive_dwm1000_distances(int distances[4]);
  * @brief UWB 통신을 통해 거리 값을 받아오고, 삼변측량을 통해 현재 위치를 계산하는 전체 과정을 포함하는 함수입니다.
  * @param position 계산된 x, y 좌표를 저장할 포인터 배열
  */
-int update_current_position(uint8_t* position);
+int update_current_position(uint8_t position[2]);
+
+/*
+ * @brief 추정된 좌표를 경로상의 좌표로 보정
+ * @param position 계산된 x, y 좌표를 저장할 포인터 배열
+ */
+void correction(uint8_t position[2]);
 
 #endif // POSITION_DETECTION_H

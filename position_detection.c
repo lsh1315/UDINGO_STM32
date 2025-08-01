@@ -113,3 +113,49 @@ int update_current_position(uint8_t* position) {
 
     return 0;
 }
+
+void correction(uint8_t position[2]){
+    int row = position[0];
+    int col = position[1];
+
+    if (row <= 9){
+        if(col <= 24){
+            row = 9;
+            col = 24;
+        }else if(col >24 && col <94){
+            row = 9;
+        }else{
+            row = 9;
+            col = 94;
+        }
+    }else if(row > 9 && row < 54){
+        if(col <= 24){
+            col = 24;
+        }else if(col<row+13 && col<76-row && col>24){
+            col = 24;
+        }else if(row<30 && col>row+15 && col>101-row){
+            row = 9;
+        }else if(col>105-row && col>row+42 && col<94){
+            col = 94;
+        }else if(col >= 94){
+            col = 94;
+        }else if(row>33 && col<80-row && col<row+38){
+            row = 54;
+        }else{
+            return;
+        }
+    }else{
+        if(col<=24){
+            row = 54;
+            col = 24;
+        }else if(col>24 && col<94){
+            row = 54;
+        }else{
+            row = 54;
+            col = 94;
+        }
+    }
+
+    position[0] = row;
+    position[1] = col;
+}
