@@ -102,21 +102,9 @@ int receive_dwm1000_distances(int distances[4]){
     return 1;
 }
 
-int update_current_position(uint8_t* position) {
-    int distances[4];
-
-    receive_dwm1000_distances(distances);
-    // Debuging
-    // printf("%dmm | %dmm | %dmm | %dmm \n",distances[0],distances[1],distances[2],distances[3]);
-
-    trilaterate(distances, position);
-
-    return 0;
-}
-
-void correction(uint8_t position[2]){
-    int row = position[0];
-    int col = position[1];
+void correction(uint8_t original_position[2], uint8_t position[2]){
+    int row = original_position[0];
+    int col = original_position[1];
 
     if (row <= 9){
         if(col <= 24){
@@ -158,4 +146,19 @@ void correction(uint8_t position[2]){
 
     position[0] = row;
     position[1] = col;
+}
+
+int update_current_position(uint8_t* position) {
+    int distances[4];
+    uint8_t original_position[2];
+
+    receive_dwm1000_distances(distances);
+    // Debuging
+    // printf("%dmm | %dmm | %dmm | %dmm \n",distances[0],distances[1],distances[2],distances[3]);
+
+    trilaterate(distances, original_position);
+
+    correction(original_position, position);
+
+    return 0;
 }
