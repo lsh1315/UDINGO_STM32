@@ -132,7 +132,7 @@ void correction(uint8_t original_position[2], uint8_t position[2]){
         }else{
             return;
         }
-    }else{
+    }else if(row>=54 && row<60){
         if(col<=24){
             row = 54;
             col = 24;
@@ -142,6 +142,8 @@ void correction(uint8_t original_position[2], uint8_t position[2]){
             row = 54;
             col = 94;
         }
+    }else{
+      return;
     }
 
     position[0] = row;
