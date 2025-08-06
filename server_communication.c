@@ -157,12 +157,8 @@ static int Non_empty_spot_download(char* response)
     // 3. TCP 연결 시작
     wifi_send_cmd_16bit("P6=1\r");
     wifi_wait_ready();
-
     wifi_receive_response_16bit(response, MAX_RESPONSE_SIZE);
-    HAL_UART_Transmit(&huart1, (uint8_t*)"P6 raw:\r\n", 9, 100);
     HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
-
-
 
     HAL_Delay(500); // ⏱ 연결 처리 시간 확보
 
