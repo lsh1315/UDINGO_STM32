@@ -2,136 +2,216 @@
 #include <stdlib.h> // for malloc, free, atoi
 #include <string.h> // for strcpy, strtok, strlen
 #include <stdint.h> // uint8_t 정의
-//#include "main.h"
+#include "main.h"
 #define MAX_RESPONSE_SIZE 50
 #define MAX_PARKING_SPOT 50
 #define BUF_SIZE 50
 
 
 // 정적 전역 변수 선언
-static char rx_buf[MAX_RESPONSE_SIZE];
 static char response[MAX_RESPONSE_SIZE];
 static uint8_t non_empty_spot[MAX_PARKING_SPOT][2];
 
-// extern SPI_HandleTypeDef hspi2;
-// extern UART_HandleTypeDef huart1;
+extern SPI_HandleTypeDef hspi2;
+extern UART_HandleTypeDef huart1;
 
-// void wifi_nss_low(void)
-// {
-//     HAL_GPIO_WritePin(SPI2_NSS_GPIO_Port, SPI2_NSS_Pin, GPIO_PIN_RESET);
-// }
+void wifi_nss_low(void)
+{
+    HAL_GPIO_WritePin(SPI2_NSS_GPIO_Port, SPI2_NSS_Pin, GPIO_PIN_RESET);
+}
 
-// void wifi_nss_high(void)
-// {
-//     HAL_GPIO_WritePin(SPI2_NSS_GPIO_Port, SPI2_NSS_Pin, GPIO_PIN_SET);
-// }
+void wifi_nss_high(void)
+{
+    HAL_GPIO_WritePin(SPI2_NSS_GPIO_Port, SPI2_NSS_Pin, GPIO_PIN_SET);
+}
 
-// void wifi_send_cmd_16bit(const char *cmd)
-// {
-//     uint8_t len = strlen(cmd);
-//     uint8_t i = 0;
+void wifi_send_cmd_16bit(const char* cmd)
+{
+    uint8_t len = strlen(cmd);
+    uint8_t i = 0;
 
-//     wifi_nss_low();
+    wifi_nss_low();
 
-//     while (i < len)
-//     {
-//         uint8_t ch1 = cmd[i++];
-//         uint8_t ch2 = (i < len) ? cmd[i++] : 0x15;  // 홀수 패딩
-//         uint16_t word = (ch2 << 8) | ch1;
-//         uint16_t resp = 0;
-//         HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)&word, (uint8_t *)&resp, 1, HAL_MAX_DELAY);
-//     }
+    while (i < len)
+    {
+        uint8_t ch1 = cmd[i++];
+        uint8_t ch2 = (i < len) ? cmd[i++] : 0x15;  // 홀수 패딩
+        uint16_t word = (ch2 << 8) | ch1;
+        uint16_t resp = 0;
+        HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)&word, (uint8_t*)&resp, 1, HAL_MAX_DELAY);
+    }
 
-//     wifi_nss_high();
-//     HAL_Delay(10);
-// }
+    wifi_nss_high();
+    HAL_Delay(10);
+}
 
-// void wifi_receive_response_16bit(char *buf, uint16_t buf_len)
-// {
-//     uint8_t i = 0;
+void wifi_receive_response_16bit(char* buf, uint16_t buf_len)
+{
+    uint8_t i = 0;
 
-//     wifi_nss_low();
-//     while (i < buf_len - 1)
-//     {
-//         uint16_t dummy = 0x0000;
-//         uint16_t resp = 0;
-//         HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)&dummy, (uint8_t *)&resp, 1, HAL_MAX_DELAY);
+    wifi_nss_low();
+    while (i < buf_len - 1)
+    {
+        uint16_t dummy = 0x0000;
+        uint16_t resp = 0;
+        HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)&dummy, (uint8_t*)&resp, 1, HAL_MAX_DELAY);
 
-//         buf[i++] = resp & 0xFF;
-//         if (i < buf_len - 1)
-//             buf[i++] = (resp >> 8) & 0xFF;
+        buf[i++] = resp & 0xFF;
+        if (i < buf_len - 1)
+            buf[i++] = (resp >> 8) & 0xFF;
 
-//         if ((resp & 0xFF) == '>' || ((resp >> 8) & 0xFF) == '>')
-//             break;
-//     }
-//     buf[i] = '\0';
-//     wifi_nss_high();
-//     HAL_Delay(10);
-// }
+        if ((resp & 0xFF) == '>' || ((resp >> 8) & 0xFF) == '>')
+            break;
+    }
+    buf[i] = '\0';
+    wifi_nss_high();
+    HAL_Delay(10);
+}
 
-// void wifi_wait_ready(void)
-// {
-//     while (HAL_GPIO_ReadPin(WIFI_DATRDY_GPIO_Port, WIFI_DATRDY_Pin) == GPIO_PIN_RESET);
-// }
+void wifi_wait_ready(void)
+{
+    while (HAL_GPIO_ReadPin(WIFI_DATRDY_GPIO_Port, WIFI_DATRDY_Pin) == GPIO_PIN_RESET);
+}
 
 /**
  * @brief 서버에 주차 공간 점유 정보를 요청하고 응답을 수신합니다.
  */
-static int Non_empty_spot_download(char *response)
+static int Non_empty_spot_download(char* response)
 {
-    // HAL_GPIO_WritePin(WIFI_RST_GPIO_Port, WIFI_RST_Pin, GPIO_PIN_RESET);
-    // HAL_Delay(10);
-    // HAL_GPIO_WritePin(WIFI_RST_GPIO_Port, WIFI_RST_Pin, GPIO_PIN_SET);
-    // HAL_Delay(50);
+    //sprintf(response, "30,17;42,15;17,102;");
+    HAL_GPIO_WritePin(WIFI_RST_GPIO_Port, WIFI_RST_Pin, GPIO_PIN_RESET);
+    HAL_Delay(10);
+    HAL_GPIO_WritePin(WIFI_RST_GPIO_Port, WIFI_RST_Pin, GPIO_PIN_SET);
+    HAL_Delay(50);
 
-    // HAL_GPIO_WritePin(WIFI_WKUP_GPIO_Port, WIFI_WKUP_Pin, GPIO_PIN_SET);
-    // HAL_GPIO_WritePin(WIFI_BOOT_GPIO_Port, WIFI_BOOT_Pin, GPIO_PIN_RESET);
-    // HAL_Delay(100);
+    HAL_GPIO_WritePin(WIFI_WKUP_GPIO_Port, WIFI_WKUP_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(WIFI_BOOT_GPIO_Port, WIFI_BOOT_Pin, GPIO_PIN_RESET);
+    HAL_Delay(100);
 
-    // wifi_wait_ready();
-    // wifi_send_cmd_16bit("$$$\r");
-    // wifi_wait_ready();
-    // wifi_receive_response_16bit(response, 128);
-    // HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    wifi_wait_ready();
+    wifi_send_cmd_16bit("$$$\r");
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
-    // wifi_wait_ready();
-	// wifi_send_cmd_16bit("S1=10\r");
-	// wifi_wait_ready();
-	// wifi_receive_response_16bit(response, 128);
-	// HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    wifi_wait_ready();
+    wifi_send_cmd_16bit("S1=10\r");
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
-    // wifi_wait_ready();
-    // wifi_send_cmd_16bit("C1=iPhone_14_pro\r\n");
-    // wifi_wait_ready();
-    // wifi_receive_response_16bit(response, 128);
-    // HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    wifi_wait_ready();
+    wifi_send_cmd_16bit("C1=Dayeon\r\n");
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
-    // wifi_wait_ready();
-    // wifi_send_cmd_16bit("C2=Dltmdgus13!\r\n");
-    // wifi_wait_ready();
-    // wifi_receive_response_16bit(response, 128);
-    // HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    wifi_wait_ready();
+    wifi_send_cmd_16bit("C2=12791279\r\n");
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
-    // wifi_wait_ready();
-    // wifi_send_cmd_16bit("C3=4\r\n");
-    // wifi_wait_ready();
-    // wifi_receive_response_16bit(response, 128);
-    // HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    wifi_wait_ready();
+    wifi_send_cmd_16bit("C3=4\r\n");
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
-    // wifi_wait_ready();
-    // wifi_send_cmd_16bit("C4=1\r\n");
-    // wifi_wait_ready();
-    // wifi_receive_response_16bit(response, 128);
-    // HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    wifi_wait_ready();
+    wifi_send_cmd_16bit("C4=1\r\n");
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
-    // wifi_wait_ready();
-    // wifi_send_cmd_16bit("C0\r\n");
-    // HAL_Delay(3000);
-    // wifi_wait_ready();
-    // wifi_receive_response_16bit(response, 128);
-    // HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    wifi_wait_ready();
+    wifi_send_cmd_16bit("C0\r\n");
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+
+    wifi_send_cmd_16bit("P5=1\r");  // 소켓 닫기
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+
+    wifi_send_cmd_16bit("P0=0\r");  // 소켓 0 사용
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+
+    wifi_send_cmd_16bit("P1=0\r");  // TCP
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, MAX_RESPONSE_SIZE);
+
+    wifi_send_cmd_16bit("P2=5024\r");  // ✅ Local port 확실히 설정
+    HAL_Delay(100);  // 반영 시간 충분히 주기
+
+    wifi_send_cmd_16bit("P4=5000\r");  // Remote port
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+
+    wifi_send_cmd_16bit("D0=3.39.40.177\r");  // Remote IP
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+
+
+    // 3. TCP 연결 시작
+    wifi_send_cmd_16bit("P6=1\r");
+    wifi_wait_ready();
+
+    wifi_receive_response_16bit(response, MAX_RESPONSE_SIZE);
+    HAL_UART_Transmit(&huart1, (uint8_t*)"P6 raw:\r\n", 9, 100);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+
+
+
+    HAL_Delay(500); // ⏱ 연결 처리 시간 확보
+
+    // 4. HTTP 메시지 구성
+    const char* http_payload =
+        "GET / HTTP/1.1\r\n"
+        "Host: 3.39.40.177\r\n"
+        "Connection: close\r\n"
+        "\r\n";
+
+    size_t payload_len = strlen(http_payload);
+
+    // 5. S3 명령어 전송 (데이터 길이만)
+    char s3_cmd[32];
+    sprintf(s3_cmd, "S3=%lu\r", payload_len);
+    wifi_send_cmd_16bit(s3_cmd);
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+
+    if (strstr(response, "OK") == NULL) {
+        HAL_UART_Transmit(&huart1, (uint8_t*)"S3 Error\r\n", 10, 100);
+        return -1;
+    }
+
+    // 6. SPI 데이터 전송
+    wifi_wait_ready();
+    wifi_nss_low();
+    HAL_Delay(1);  // 안정화 대기
+
+    for (int i = 0; i < payload_len; i += 2) {
+        uint8_t ch1 = http_payload[i];
+        uint8_t ch2 = (i + 1 < payload_len) ? http_payload[i + 1] : 0x15;
+        uint16_t word = (ch1 << 8) | ch2;
+        uint16_t resp;
+        HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)&word, (uint8_t*)&resp, 1, HAL_MAX_DELAY);
+    }
+
+    wifi_nss_high();
+    HAL_Delay(20);  // 응답 처리 대기
+
+    // 7. 응답 수신
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
+    response[127] = '\0';
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
     return 1;
+
+
 }
 
 /**
@@ -185,7 +265,7 @@ static void replace_1_non_empty_spot(uint8_t** map, uint8_t spot_array[MAX_PARKI
     for (int i = 0; i < num; i++) {
         uint8_t row = spot_array[i][0];
         uint8_t colum = spot_array[i][1];
-        
+
         map[row][colum] = 1;
     }
 }
