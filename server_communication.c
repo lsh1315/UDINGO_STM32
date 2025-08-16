@@ -3,7 +3,7 @@
 #include <string.h> // for strcpy, strtok, strlen
 #include <stdint.h> // uint8_t 정의
 #include "main.h"
-#define MAX_RESPONSE_SIZE 50
+#define MAX_RESPONSE_SIZE 512
 #define MAX_PARKING_SPOT 50
 #define BUF_SIZE 50
 
@@ -44,10 +44,10 @@ void wifi_send_cmd_16bit(const char* cmd)
     wifi_nss_high();
     HAL_Delay(10);
 }
-
 void wifi_receive_response_16bit(char* buf, uint16_t buf_len)
 {
     uint8_t i = 0;
+    uint8_t found_gt = 0;  // '>' 찾았는지 여부
 
     wifi_nss_low();
     while (i < buf_len - 1)
@@ -56,17 +56,27 @@ void wifi_receive_response_16bit(char* buf, uint16_t buf_len)
         uint16_t resp = 0;
         HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)&dummy, (uint8_t*)&resp, 1, HAL_MAX_DELAY);
 
+        // Low byte
         buf[i++] = resp & 0xFF;
-        if (i < buf_len - 1)
-            buf[i++] = (resp >> 8) & 0xFF;
+        if ((resp & 0xFF) == '>') {
+            found_gt = 1;
+            break;  // '>' 나왔으면 끊고 나간다 (Low byte에서 끝)
+        }
 
-        if ((resp & 0xFF) == '>' || ((resp >> 8) & 0xFF) == '>')
-            break;
+        // High byte (버퍼 초과 방지)
+        if (i < buf_len - 1) {
+            buf[i++] = (resp >> 8) & 0xFF;
+            if (((resp >> 8) & 0xFF) == '>') {
+                found_gt = 1;
+                break;  // High byte에서 '>' 감지 시 종료
+            }
+        }
     }
     buf[i] = '\0';
     wifi_nss_high();
     HAL_Delay(10);
 }
+
 
 void wifi_wait_ready(void)
 {
@@ -130,28 +140,40 @@ static int Non_empty_spot_download(char* response)
     wifi_receive_response_16bit(response, 128);
     HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
-    wifi_send_cmd_16bit("P5=1\r");  // 소켓 닫기
-    wifi_wait_ready();
-    wifi_receive_response_16bit(response, 128);
-
     wifi_send_cmd_16bit("P0=0\r");  // 소켓 0 사용
     wifi_wait_ready();
     wifi_receive_response_16bit(response, 128);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+
 
     wifi_send_cmd_16bit("P1=0\r");  // TCP
     wifi_wait_ready();
     wifi_receive_response_16bit(response, MAX_RESPONSE_SIZE);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
-    wifi_send_cmd_16bit("P2=5024\r");  // ✅ Local port 확실히 설정
+
+    wifi_send_cmd_16bit("P2=5024\r");
     HAL_Delay(100);  // 반영 시간 충분히 주기
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+
+
 
     wifi_send_cmd_16bit("P4=5000\r");  // Remote port
     wifi_wait_ready();
     wifi_receive_response_16bit(response, 128);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
-    wifi_send_cmd_16bit("D0=3.39.40.177\r");  // Remote IP
+
+
+    wifi_send_cmd_16bit("P3=3.39.40.177\r");  // Remote IP
     wifi_wait_ready();
     wifi_receive_response_16bit(response, 128);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+
+    wifi_send_cmd_16bit("P?\r");
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, MAX_RESPONSE_SIZE);
+    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
 
     // 3. TCP 연결 시작
@@ -160,54 +182,66 @@ static int Non_empty_spot_download(char* response)
     wifi_receive_response_16bit(response, MAX_RESPONSE_SIZE);
     HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
-    HAL_Delay(500); // ⏱ 연결 처리 시간 확보
 
-    // 4. HTTP 메시지 구성
     const char* http_payload =
-        "GET / HTTP/1.1\r\n"
+        "GET /occupied_string HTTP/1.1\r\n"
         "Host: 3.39.40.177\r\n"
         "Connection: close\r\n"
         "\r\n";
 
     size_t payload_len = strlen(http_payload);
 
-    // 5. S3 명령어 전송 (데이터 길이만)
+    // 📌 실제 payload 길이 확인
+    char debug[128];
+    sprintf(debug, "[DEBUG] Payload len: %lu\r\n", payload_len);
+    HAL_UART_Transmit(&huart1, (uint8_t*)debug, strlen(debug), 100);
+
+    // 📌 S3 명령어 구성
     char s3_cmd[32];
     sprintf(s3_cmd, "S3=%lu\r", payload_len);
-    wifi_send_cmd_16bit(s3_cmd);
-    wifi_wait_ready();
-    wifi_receive_response_16bit(response, 128);
+    sprintf(debug, "[DEBUG] S3 cmd: %s\r\n", s3_cmd);
+    HAL_UART_Transmit(&huart1, (uint8_t*)debug, strlen(debug), 100);
 
-    if (strstr(response, "OK") == NULL) {
-        HAL_UART_Transmit(&huart1, (uint8_t*)"S3 Error\r\n", 10, 100);
-        return -1;
+    wifi_nss_low();  // --- NSS 시작 ---
+
+    // ✅ S3 명령어 전송
+    for (int i = 0; i < strlen(s3_cmd); i += 2) {
+        uint8_t ch1 = s3_cmd[i];
+        uint8_t ch2 = (i + 1 < strlen(s3_cmd)) ? s3_cmd[i + 1] : 0x15;
+        uint16_t word = (ch2 << 8) | ch1;
+        uint16_t resp;
+
+        HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)&word, (uint8_t*)&resp, 1, HAL_MAX_DELAY);
+
+        // 디버그 출력
+        sprintf(debug, "[S3 SEND] Bytes: 0x%02X 0x%02X | Chars: '%c''%c' | Resp: 0x%04X\r\n",
+                ch1, ch2, ch1, ch2, resp);
+        HAL_UART_Transmit(&huart1, (uint8_t*)debug, strlen(debug), 100);
     }
 
-    // 6. SPI 데이터 전송
-    wifi_wait_ready();
-    wifi_nss_low();
-    HAL_Delay(1);  // 안정화 대기
-
+    // ✅ HTTP 데이터 전송
     for (int i = 0; i < payload_len; i += 2) {
         uint8_t ch1 = http_payload[i];
         uint8_t ch2 = (i + 1 < payload_len) ? http_payload[i + 1] : 0x15;
-        uint16_t word = (ch1 << 8) | ch2;
+        uint16_t word = (ch2 << 8) | ch1;
         uint16_t resp;
+
         HAL_SPI_TransmitReceive(&hspi2, (uint8_t*)&word, (uint8_t*)&resp, 1, HAL_MAX_DELAY);
+
+        // 디버그 출력
+        sprintf(debug, "[HTTP SEND] Bytes: 0x%02X 0x%02X | Chars: '%c''%c' | Resp: 0x%04X\r\n",
+                ch1, ch2, ch1, ch2, resp);
+        HAL_UART_Transmit(&huart1, (uint8_t*)debug, strlen(debug), 100);
     }
 
-    wifi_nss_high();
-    HAL_Delay(20);  // 응답 처리 대기
+    wifi_nss_high();  // --- NSS 끝 ---
 
-    // 7. 응답 수신
+    // ✅ 응답 수신
     wifi_wait_ready();
-    wifi_receive_response_16bit(response, 128);
-    response[127] = '\0';
+    wifi_receive_response_16bit(response, sizeof(response));
     HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
     return 1;
-
-
 }
 
 /**
