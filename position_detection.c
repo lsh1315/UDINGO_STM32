@@ -95,10 +95,8 @@ int receive_dwm1000_distances(int distances[4]){
     uint8_t i=0;
     temp = strtok(str,",");
     while(temp != NULL){
-        distances[i] = atoi(temp);
-        if (distances[i] < 0) distances[i] = 0;
+        distances[i++] = atoi(temp);
         temp = strtok(NULL,",");
-        i++;
     }
 
     return 1;
