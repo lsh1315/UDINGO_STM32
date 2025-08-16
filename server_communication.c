@@ -152,10 +152,10 @@ static int Non_empty_spot_download(char* response)
     HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
 
-    wifi_send_cmd_16bit("P2=5024\r");
-    HAL_Delay(100);  // 반영 시간 충분히 주기
+    wifi_send_cmd_16bit("P3=3.39.40.177\r");  // Remote IP
+    wifi_wait_ready();
+    wifi_receive_response_16bit(response, 128);
     HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
-
 
 
     wifi_send_cmd_16bit("P4=5000\r");  // Remote port
@@ -164,11 +164,6 @@ static int Non_empty_spot_download(char* response)
     HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
 
-
-    wifi_send_cmd_16bit("P3=3.39.40.177\r");  // Remote IP
-    wifi_wait_ready();
-    wifi_receive_response_16bit(response, 128);
-    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
     wifi_send_cmd_16bit("P?\r");
     wifi_wait_ready();
