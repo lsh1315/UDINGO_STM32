@@ -9,9 +9,9 @@
 int trilaterate(int distances[4], uint8_t position[2]) {
     // Anchor coordinates
     double x1 = 0, y1 = 0;
-    double x2 = 600, y2 = 0;
-    double x3 = 0, y3 = 1200;
-    double x4 = 600, y4 = 1200;
+    double x2 = 590, y2 = 0;
+    double x3 = 0, y3 = 1190;
+    double x4 = 590, y4 = 1190;
 
     double d1 = distances[0];
     double d2 = distances[1];
@@ -95,8 +95,10 @@ int receive_dwm1000_distances(int distances[4]){
     uint8_t i=0;
     temp = strtok(str,",");
     while(temp != NULL){
-        distances[i++] = atoi(temp);
+        distances[i] = atoi(temp);
+        if (distances[i] < 0) distances[i] = 0;
         temp = strtok(NULL,",");
+        i++;
     }
 
     return 1;
