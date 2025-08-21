@@ -3,7 +3,7 @@
 #include "parking_lot.h" 
 #include "path_planning.h"
 #include "position_detection.h"
-#include "server_communication.h"
+//#include "server_communication.h"
 
 #define ARRAY_CAPACITY 100 // 경로 및 빈자리 배열의 최대 크기 정의
 
@@ -39,10 +39,10 @@ int main() {
     scanf("%hhu", &user_preference[1]);
 
     // 4. 서버와 통신해 비어있는 않은 주차 구역 정보 받아오기 --> 해당 좌표 벽(1)으로 
-    if(update_parking_occupancy(map_matrix) != 1){
-        printf("서버 통신 실패");
-        return 0;
-    }
+    // if(update_parking_occupancy(map_matrix) != 1){
+    //     printf("서버 통신 실패");
+    //     return 0;
+    // }
 
     // 5. 메인 루프 (실제 시스템에서는 RTOS의 태스크로 각 모듈이 주기적으로 실행됨)
     int count = 0; // 루프 실행 횟수 (디버깅 및 테스트용)
@@ -51,8 +51,8 @@ int main() {
 
         // 5-1. 현재 위치 업데이트
         // position_detection.h에 정의된 함수를 사용하여 현재 위치를 업데이트
-        // position[0] = 58, position[1] = 25;  // 입구 (디버깅용: 특정 위치로 고정)
-        update_current_position(position);      // 아직 앵커들과의 거리 고정 --> 입구 (uwb 통신 구현 예정)
+        position[0] = 54, position[1] = 24;  // 입구 (디버깅용: 특정 위치로 고정)
+        // update_current_position(position);      // 아직 앵커들과의 거리 고정 --> 입구 (uwb 통신 구현 예정)
 
         // 5-2. 최적의 주차 공간 탐색 및 경로 계획
         // find_preferred_parking: 사용자 선호도에 따라 최적의 빈 주차 공간(goal)을 탐색
