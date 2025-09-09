@@ -1,16 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h> // abs()를 위해 포함
-#include <stdint.h> // uint8_t 정의
+#include <math.h>
+#include <stdint.h>
 
-#define ARRAY_CAPACITY 100 // 경로 및 빈자리 배열의 최대 크기 정의
-#define INF 99999
+#define ARRAY_CAPACITY 100
+#define INF 65535 // f, g 값의 최대값 (uint16_t에 맞춤)
 
-// ---------- 구조체 ----------
+// ---------- 상태 정의 ----------
+#define STATUS_UNVISITED 0
+#define STATUS_OPEN 1
+#define STATUS_CLOSED 2
+
+// ---------- 구조체 (최적화) ----------
 typedef struct {
-    int y, x;
-    int g, f;
-    int parent_y, parent_x;
+    uint16_t g;       // 경로 비용
+    uint16_t f;       // 총 예상 비용 (g + h)
+    int parent_idx; // 부모 노드의 인덱스
 } Node;
 
 // ---------- 휴리스틱 함수 ----------
@@ -18,23 +23,21 @@ static int heuristic(int y1, int x1, int y2, int x2) {
     return abs(y1 - y2) + abs(x1 - x2);
 }
 
-// ---------- 경로 재구성 ----------
-static int reconstruct_path(Node** nodes, int current_y, int current_x, uint8_t path[][2], uint8_t map_cols) {
+// ---------- 경로 재구성 (인덱스 기반) ----------
+static int reconstruct_path(Node* nodes, int current_idx, uint8_t path[][2], int map_cols) {
     uint8_t temp_path[ARRAY_CAPACITY][2];
-    uint8_t len = 0;
-    int y = current_y;
-    int x = current_x;
+    int len = 0;
+    int idx = current_idx;
 
-    while (y != -1 && x != -1) {
-        if (len >= ARRAY_CAPACITY) return 0;
-        temp_path[len][0] = y;
-        temp_path[len][1] = x;
+    while (idx != -1) {
+        if (len >= ARRAY_CAPACITY) return 0; // 경로 버퍼 오버플로우 방지
+        temp_path[len][0] = (uint8_t)(idx / map_cols); // y 좌표
+        temp_path[len][1] = (uint8_t)(idx % map_cols); // x 좌표
         len++;
-        Node current_node = nodes[y][x];
-        y = current_node.parent_y;
-        x = current_node.parent_x;
+        idx = nodes[idx].parent_idx;
     }
 
+    // 경로를 역순으로 다시 저장
     for (int i = 0; i < len; i++) {
         path[i][0] = temp_path[len - i - 1][0];
         path[i][1] = temp_path[len - i - 1][1];
@@ -42,84 +45,109 @@ static int reconstruct_path(Node** nodes, int current_y, int current_x, uint8_t 
     return len;
 }
 
-// ---------- A* 알고리즘 ----------
+// ---------- A* 알고리즘 (메모리 최적화) ----------
 int astar(const uint8_t* start_pos, const uint8_t* target_pos, uint8_t** map_matrix, uint8_t rows, uint8_t cols, uint8_t path[][2]) {
-    int sy = start_pos[0];
-    int sx = start_pos[1];
-    int ty = target_pos[0];
-    int tx = target_pos[1];
+    int map_size = rows * cols;
+    int sy = start_pos[0], sx = start_pos[1];
+    int ty = target_pos[0], tx = target_pos[1];
+    int start_idx = sy * cols + sx;
+    int target_idx = ty * cols + tx;
 
-    Node** nodes = (Node**)malloc(rows * sizeof(Node*));
-    for (int i = 0; i < rows; i++) {
-        nodes[i] = (Node*)malloc(cols * sizeof(Node));
-        for (int j = 0; j < cols; j++) {
-            nodes[i][j] = (Node){ .y = i, .x = j, .g = INF, .f = INF, .parent_y = -1, .parent_x = -1 };
-        }
+    // 1. 노드 정보 배열 (1D)
+    Node* nodes = (Node*)malloc(map_size * sizeof(Node));
+    if (!nodes) return 0;
+
+    // 2. 상태 관리 배열 (미방문/열림/닫힘)
+    uint8_t* status = (uint8_t*)calloc(map_size, sizeof(uint8_t));
+    if (!status) {
+        free(nodes);
+        return 0;
     }
 
-    Node start_node = { .y = sy, .x = sx, .g = 0, .f = heuristic(sy, sx, ty, tx), .parent_y = -1, .parent_x = -1 };
-    nodes[sy][sx] = start_node;
+    // 3. Open List (노드 인덱스만 저장)
+    int* open_list = (int*)malloc(map_size * sizeof(int));
+    if (!open_list) {
+        free(nodes);
+        free(status);
+        return 0;
+    }
 
-    Node* open_list = (Node*)malloc(rows * cols * sizeof(Node));
+    for (int i = 0; i < map_size; i++) {
+        nodes[i].g = INF;
+        nodes[i].f = INF;
+        nodes[i].parent_idx = -1;
+    }
+
+    nodes[start_idx].g = 0;
+    nodes[start_idx].f = heuristic(sy, sx, ty, tx);
+
     int open_size = 0;
-    open_list[open_size++] = start_node;
-
-    int* in_open_list = (int*)calloc(rows * cols, sizeof(int));
-    in_open_list[sy * cols + sx] = 1;
+    open_list[open_size++] = start_idx;
+    status[start_idx] = STATUS_OPEN;
 
     int path_len = 0;
 
     while (open_size > 0) {
-        int current_idx = 0;
+        int current_open_idx = 0;
         for (int i = 1; i < open_size; i++) {
-            if (open_list[i].f < open_list[current_idx].f) {
-                current_idx = i;
+            if (nodes[open_list[i]].f < nodes[open_list[current_open_idx]].f) {
+                current_open_idx = i;
             }
         }
 
-        Node current = open_list[current_idx];
-        open_list[current_idx] = open_list[--open_size];
+        int current_idx = open_list[current_open_idx];
 
-        if (current.y == ty && current.x == tx) {
-            path_len = reconstruct_path(nodes, ty, tx, path, cols);
+        open_list[current_open_idx] = open_list[--open_size];
+        status[current_idx] = STATUS_CLOSED;
+
+        if (current_idx == target_idx) {
+            path_len = reconstruct_path(nodes, target_idx, path, cols);
             break;
         }
 
-        int dy[4] = { -1, 1, 0, 0 };
-        int dx[4] = { 0, 0, -1, 1 };
+        int cy = current_idx / cols;
+        int cx = current_idx % cols;
+
+        int dy[] = {-1, 1, 0, 0};
+        int dx[] = {0, 0, -1, 1};
 
         for (int i = 0; i < 4; i++) {
-            int ny = current.y + dy[i];
-            int nx = current.x + dx[i];
+            int ny = cy + dy[i];
+            int nx = cx + dx[i];
 
-            if (ny < 0 || ny >= rows || nx < 0 || nx >= cols || map_matrix[ny][nx] == 1)
+            if (ny < 0 || ny >= rows || nx < 0 || nx >= cols || map_matrix[ny][nx] == 1) {
                 continue;
+            }
 
-            int tentative_g_score = current.g + 1;
+            int neighbor_idx = ny * cols + nx;
 
-            if (tentative_g_score < nodes[ny][nx].g) {
-                nodes[ny][nx].parent_y = current.y;
-                nodes[ny][nx].parent_x = current.x;
-                nodes[ny][nx].g = tentative_g_score;
-                nodes[ny][nx].f = tentative_g_score + heuristic(ny, nx, ty, tx);
+            if (status[neighbor_idx] == STATUS_CLOSED) {
+                continue;
+            }
 
-                if (!in_open_list[ny * cols + nx]) {
-                    open_list[open_size++] = nodes[ny][nx];
-                    in_open_list[ny * cols + nx] = 1;
+            uint16_t tentative_g_score = nodes[current_idx].g + 1;
+
+            if (tentative_g_score < nodes[neighbor_idx].g) {
+                nodes[neighbor_idx].parent_idx = current_idx;
+                nodes[neighbor_idx].g = tentative_g_score;
+                nodes[neighbor_idx].f = tentative_g_score + heuristic(ny, nx, ty, tx);
+
+                if (status[neighbor_idx] != STATUS_OPEN) {
+                    open_list[open_size++] = neighbor_idx;
+                    status[neighbor_idx] = STATUS_OPEN;
                 }
             }
         }
     }
 
-    for (int i = 0; i < rows; i++) free(nodes[i]);
     free(nodes);
+    free(status);
     free(open_list);
-    free(in_open_list);
 
     return path_len;
 }
 
-// ---------- 주차 자리 선택 ----------
+// ---------- 주차 자리 선택 (기존 로직 유지) ----------
 void find_preferred_parking(
     const uint8_t* user_preference,
     uint8_t** map_matrix,
@@ -131,49 +159,46 @@ void find_preferred_parking(
     int prefer_criteria = user_preference[1];
 
     int min_dist = INF;
-    goal[0] = goal[1] = -1;
+    goal[0] = goal[1] = 255; // uint8_t에 맞게 초기화
 
     int entry_pos[2] = { -1, -1 }, exit_pos[2] = { -1, -1 }, mall_pos[2] = { -1, -1 };
 
     for (int r = 0; r < map_rows; r++) {
         for (int c = 0; c < map_cols; c++) {
-            if (map_matrix[r][c] == 6) entry_pos[0] = r, entry_pos[1] = c;
-            if (map_matrix[r][c] == 7) exit_pos[0] = r, exit_pos[1] = c;
-            if (map_matrix[r][c] == 8 && mall_pos[0] == -1) mall_pos[0] = r, mall_pos[1] = c;
+            if (map_matrix[r][c] == 6) { entry_pos[0] = r; entry_pos[1] = c; }
+            if (map_matrix[r][c] == 7) { exit_pos[0] = r; exit_pos[1] = c; }
+            if (map_matrix[r][c] == 8 && mall_pos[0] == -1) { mall_pos[0] = r; mall_pos[1] = c; }
         }
     }
-    int found_preferred = 0; // 경차/장애인 자리 다 찼을때 일반자리에서 찾게하는 로직위한 변수
-    // 주차 공간을 map_matrix에서 직접 찾습니다.
+
+    int found_preferred = 0;
     for (int r = 0; r < map_rows; r++) {
         for (int c = 0; c < map_cols; c++) {
             int type = map_matrix[r][c];
-            // 주차 공간 타입 (예: 2, 3, 4, 5)에 따라 처리
-            if (type >= 2 && type <= 5) { // 가정: 2~5는 주차 공간 타입
-                if (type == preferred_type) {
-                    int dist = INF;
-                    if (prefer_criteria == 1 && entry_pos[0] != -1)
-                        dist = heuristic(r, c, entry_pos[0], entry_pos[1]);
-                    else if (prefer_criteria == 2 && exit_pos[0] != -1)
-                        dist = heuristic(r, c, exit_pos[0], exit_pos[1]);
-                    else if (prefer_criteria == 3 && mall_pos[0] != -1)
-                        dist = heuristic(r, c, mall_pos[0], mall_pos[1]);
+            if (type == preferred_type) {
+                int dist = INF;
+                if (prefer_criteria == 1 && entry_pos[0] != -1)
+                    dist = heuristic(r, c, entry_pos[0], entry_pos[1]);
+                else if (prefer_criteria == 2 && exit_pos[0] != -1)
+                    dist = heuristic(r, c, exit_pos[0], exit_pos[1]);
+                else if (prefer_criteria == 3 && mall_pos[0] != -1)
+                    dist = heuristic(r, c, mall_pos[0], mall_pos[1]);
 
-                    if (dist < min_dist) {
-                        min_dist = dist;
-                        goal[0] = r;
-                        goal[1] = c;
-                        found_preferred = 1; // 경차/장애인 자리 다 찼을때 일반자리에서 찾게하는 로직위한 변수
-                    }
+                if (dist < min_dist) {
+                    min_dist = dist;
+                    goal[0] = r;
+                    goal[1] = c;
+                    found_preferred = 1;
                 }
             }
         }
     }
-    // 선호 주차 타입이 다 찼다면 일반 타입(4번) 중 추천
+
     if (!found_preferred) {
         min_dist = INF;
         for (int r = 0; r < map_rows; r++) {
             for (int c = 0; c < map_cols; c++) {
-                if (map_matrix[r][c] == 4) {
+                if (map_matrix[r][c] == 4) { // 일반 주차 공간
                     int dist = INF;
                     if (prefer_criteria == 1 && entry_pos[0] != -1)
                         dist = heuristic(r, c, entry_pos[0], entry_pos[1]);
