@@ -4,13 +4,16 @@
 #include <math.h>
 #include <stdint.h>
 
+#define RX_BUFFER_SIZE 128 // 버퍼 크기는 넉넉하게 설정
+extern uint8_t rx_buffer[RX_BUFFER_SIZE]; // 수신 데이터를 저장할 버퍼
+
 // Function to calculate the position using trilateration
 // Returns 1 on success, 0 on failure
 int trilaterate(int distances[4], uint8_t position[2]) {
     // Anchor coordinates
-    double x1 = 0, y1 = 0;
-    double x2 = 590, y2 = 0;
-    double x3 = 0, y3 = 1190;
+    double x1 = 10, y1 = 10;
+    double x2 = 590, y2 = 10;
+    double x3 = 10, y3 = 1190;
     double x4 = 590, y4 = 1190;
 
     double d1 = distances[0];
@@ -89,14 +92,16 @@ int trilaterate(int distances[4], uint8_t position[2]) {
 int receive_dwm1000_distances(int distances[4]){
     
     // It will be replaced with UART Transceive
-    char str[] = "631,250,1114,949";
+    // char str[] = "631,250,1114,949";
 
     char *temp;
     uint8_t i=0;
-    temp = strtok(str,",");
+    temp = strtok(rx_buffer,",");
     while(temp != NULL){
-        distances[i++] = atoi(temp);
+        distances[i] = atoi(temp);
+        if (distances[i] < 0) distances[i] = 0;
         temp = strtok(NULL,",");
+        i++;
     }
 
     return 1;
@@ -151,12 +156,10 @@ void correction(uint8_t original_position[2], uint8_t position[2]){
 }
 
 int update_current_position(uint8_t* position) {
-    int distances[4];
+    int distances[4] = {0,};
     uint8_t original_position[2];
 
     receive_dwm1000_distances(distances);
-    // Debuging
-    // printf("%dmm | %dmm | %dmm | %dmm \n",distances[0],distances[1],distances[2],distances[3]);
 
     trilaterate(distances, original_position);
 
