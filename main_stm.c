@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "stm32h7b3i_discovery_ospi.h"
 #include "gui_bridge.h"
+#include "semphr.h"
 #include <stdio.h>
 #include <string.h>
 #include "parking_lot.h"
@@ -85,7 +86,7 @@ osThreadId_t GUI_TaskHandle;
 const osThreadAttr_t GUI_Task_attributes = {
   .name = "GUI_Task",
   .stack_size = 8192 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityAboveNormal,
 };
 /* Definitions for videoTask */
 osThreadId_t videoTaskHandle;
@@ -99,14 +100,14 @@ osThreadId_t UWBHandle;
 const osThreadAttr_t UWB_attributes = {
   .name = "UWB",
   .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityBelowNormal,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for PathPlanning */
 osThreadId_t PathPlanningHandle;
 const osThreadAttr_t PathPlanning_attributes = {
   .name = "PathPlanning",
   .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityBelowNormal,
 };
 /* Definitions for PrintDebug */
 osThreadId_t PrintDebugHandle;
@@ -114,6 +115,13 @@ const osThreadAttr_t PrintDebug_attributes = {
   .name = "PrintDebug",
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for Server */
+osThreadId_t ServerHandle;
+const osThreadAttr_t Server_attributes = {
+  .name = "Server",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* USER CODE BEGIN PV */
 FMC_SDRAM_CommandTypeDef command;
@@ -129,7 +137,7 @@ uint8_t map_rows, map_cols;             // 주차장 지도의 행과 열 크기
 uint8_t user_preference[2];             // 사용자 선호도: [주차 구역 유형, 기준]
                                         // 유형: 2(경차), 3(장애인), 4(일반), 5(전기차)
                                         // 기준: 1(입구 근처), 2(출구 근처), 3(마트 출입구 근처)
-uint8_t position[2] = {54, 24};                    // 현재 차량의 위치 [행, 열]
+uint8_t position[2] = {54,24};                    // 현재 차량의 위치 [행, 열]
 uint8_t path[100][2];        // A* 알고리즘으로 계산된 최적 경로를 저장하는 배열
 uint8_t path_length;                    // 최적 경로의 길이
 uint8_t goal[2];                        // 최종 목적지 주차 공간의 좌표 [행, 열]
@@ -147,6 +155,8 @@ uint8_t rx_buffer[RX_BUFFER_SIZE]; // 수신 데이터를 저장할 버퍼
 volatile uint16_t rx_index = 0; // 버퍼의 현재 위치 (volatile 키워드 추가)
 volatile ReceiveState rx_state = STATE_WAIT_FIRST_CR; // 현재 수신 상태 (초기 상태)
 volatile uint8_t data_ready = 0; // 데이터 수신 완료 플래그
+
+SemaphoreHandle_t uart4RxSemaphore; // 세마포어 핸들 선언
 
 /* USER CODE END PV */
 
@@ -171,6 +181,7 @@ extern void videoTaskFunc(void *argument);
 void StartUWB(void *argument);
 void StartPathPlanning(void *argument);
 void StartPrintDebug(void *argument);
+void StartServer(void *argument);
 
 /* USER CODE BEGIN PFP */
 static void SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram, FMC_SDRAM_CommandTypeDef *Command);
@@ -266,6 +277,10 @@ int main(void)
    return 0;
   }
 
+  // 바이너리 세마포어 생성
+  uart4RxSemaphore = xSemaphoreCreateBinary();
+
+  // UART 수신 인터럽트 시작
   HAL_UART_Receive_IT(&huart4, &rx_data, 1);
 
 //  // map 출력 (디버깅용)
@@ -345,6 +360,9 @@ int main(void)
 
   /* creation of PrintDebug */
   PrintDebugHandle = osThreadNew(StartPrintDebug, NULL, &PrintDebug_attributes);
+
+  /* creation of Server */
+  ServerHandle = osThreadNew(StartServer, NULL, &Server_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -914,7 +932,6 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOI_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOG_CLK_ENABLE();
   __HAL_RCC_GPIOK_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
@@ -932,13 +949,13 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOG, LED3_Pin|LED2_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOH, VSYNC_FREQ_Pin|RENDER_TIME_Pin|MCU_ACTIVE_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, SPI2_NSS_Pin|LCD_BL_CTRL_Pin|LCD_ON_OFF_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOI, WIFI_WKUP_Pin|WIFI_RST_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(MCU_ACTIVE_GPIO_Port, MCU_ACTIVE_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : WIFI_GPIO_Pin WIFI_DATRDY_Pin */
   GPIO_InitStruct.Pin = WIFI_GPIO_Pin|WIFI_DATRDY_Pin;
@@ -960,13 +977,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : VSYNC_FREQ_Pin RENDER_TIME_Pin MCU_ACTIVE_Pin */
-  GPIO_InitStruct.Pin = VSYNC_FREQ_Pin|RENDER_TIME_Pin|MCU_ACTIVE_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  HAL_GPIO_Init(GPIOH, &GPIO_InitStruct);
-
   /*Configure GPIO pins : SPI2_NSS_Pin LCD_BL_CTRL_Pin */
   GPIO_InitStruct.Pin = SPI2_NSS_Pin|LCD_BL_CTRL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -986,6 +996,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(LCD_INT_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : MCU_ACTIVE_Pin */
+  GPIO_InitStruct.Pin = MCU_ACTIVE_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(MCU_ACTIVE_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LCD_ON_OFF_Pin */
   GPIO_InitStruct.Pin = LCD_ON_OFF_Pin;
@@ -1009,6 +1026,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+/* USER CODE BEGIN 4 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     if(huart->Instance == UART4)
@@ -1030,39 +1048,48 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
                 }
                 else
                 {
-                    rx_state = STATE_WAIT_FIRST_CR; // '\n'이 아니면 다시 초기 상태로
+                    // '\r' 다음에 '\n'이 오지 않았으므로 다시 초기 상태로 리셋
+                    rx_state = STATE_WAIT_FIRST_CR;
                 }
                 break;
 
             case STATE_CAPTURING: // 3. 데이터 캡처 중
                 if(rx_data == '\r')
                 {
-                    rx_state = STATE_WAIT_SECOND_CR; // '\r'을 만나면 두 번째 '\r\n'의 시작으로 간주
+                    // 종료 '\r'일 수 있으므로 다음 상태로 전환
+                    rx_state = STATE_WAIT_SECOND_CR;
                 }
-                else if (rx_index < RX_BUFFER_SIZE - 1) // 버퍼가 꽉 차지 않았으면
+                else if (rx_index < RX_BUFFER_SIZE - 1) // 버퍼 오버플로우 방지
                 {
-                    rx_buffer[rx_index++] = rx_data; // 데이터 저장
+                    rx_buffer[rx_index++] = rx_data; // 버퍼에 데이터 저장
                 }
                 break;
 
             case STATE_WAIT_SECOND_CR: // 4. 두 번째 '\n'을 기다림
-                if(rx_data == '\n') // 두 번째 '\n'을 만나면
+                if(rx_data == '\n') // 두 번째 '\n'을 만나면 수신 완료
                 {
                     rx_buffer[rx_index] = '\0'; // 문자열의 끝에 NULL 추가
-                    data_ready = 1; // 데이터 수신 완료 플래그 설정
-                    rx_state = STATE_WAIT_FIRST_CR; // 모든 과정이 끝났으므로 다시 초기 상태로
+
+                    // 태스크를 깨우기 위해 세마포어 반납
+                    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+                    xSemaphoreGiveFromISR(uart4RxSemaphore, &xHigherPriorityTaskWoken);
+                    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+
+                    // 모든 과정이 끝났으므로 다시 초기 상태로
+                    rx_state = STATE_WAIT_FIRST_CR;
                 }
-                else // '\n'이 아니라 다른 문자라면
+                else // '\r' 다음에 '\n'이 아니라 다른 문자가 온 경우
                 {
-                    // 이전에 '\r'로 판단했던 문자를 버퍼에 추가
+                    // 이전에 '\r'로 판단했던 문자를 다시 버퍼에 저장
                     if (rx_index < RX_BUFFER_SIZE - 1) {
                         rx_buffer[rx_index++] = '\r';
                     }
-                    // 현재 수신된 문자도 버퍼에 추가
+                    // 현재 수신된 문자도 버퍼에 저장
                     if (rx_index < RX_BUFFER_SIZE - 1) {
                         rx_buffer[rx_index++] = rx_data;
                     }
-                    rx_state = STATE_CAPTURING; // 다시 캡처 상태로 복귀
+                    // 다시 캡처 상태로 복귀
+                    rx_state = STATE_CAPTURING;
                 }
                 break;
         }
@@ -1161,37 +1188,36 @@ void StartUWB(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    if(HAL_UART_Transmit(&huart1, (uint8_t*)"\r\n-------- UWB --------\r\n", 28, 100) != HAL_OK){
-    Error_Handler();
+    // 세마포어 신호가 올 때까지 무한정 기다립니다. (이때 태스크는 휴면 상태)
+    if (xSemaphoreTake(uart4RxSemaphore, portMAX_DELAY) == pdTRUE)
+    {
+        // 이 아래 코드는 오직 UART 인터럽트가 신호를 줬을 때만 실행됩니다.
+        if(HAL_UART_Transmit(&huart1, (uint8_t*)"\r\n-------- UWB ---------\r\n", 28, 100) != HAL_OK){
+            Error_Handler();
+        }
+
+        // 현재 위치 계산, 업데이트
+        // update_current_position(position);
+
+        // update_current_position(position) 내부 로직(+ 로그 출력)
+        uint8_t original_position[2];
+        int dist[4] = {0,};
+
+        // dwm1000 거리 수신 및 나머지 로직 실행
+        receive_dwm1000_distances(dist);
+
+        sprintf(str, "%d mm | %d mm | %d mm | %d mm\r\n", dist[0],dist[1],dist[2],dist[3]);
+        HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), 100);
+
+        trilaterate(dist, original_position);
+        sprintf(str, "Position(cm) : (%d, %d) ", original_position[0], original_position[1]);
+        HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), 100);
+
+        correction(original_position, position);
+        sprintf(str, "---> (%d, %d)\r\n", position[0],position[1]);
+        HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), 100);
     }
-    // 5-1. 현재 위치 업데이트
-    // position_detection.h에 정의된 함수를 사용하여 현재 위치를 업데이트
-    //  position[0] = 58, position[1] = 25; // 입구 (디버깅용: 특정 위치로 고정)
-    //update_current_position(position);  // (현재) 입구로 고정
-
-    uint8_t original_position[2];
-    int dist[4] = {0,};
-
-    receive_dwm1000_distances(dist);
-    sprintf(str, "qwer: %s\r\n", rx_buffer);
-    HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), 100);
-
-    // Debuging print
-    sprintf(str, "%d mm | %d mm | %d mm | %d mm\r\n", dist[0],dist[1],dist[2],dist[3]);
-    HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), 100);
-
-    // position_detecting and debuging print
-    trilaterate(dist, original_position);
-    sprintf(str, "Position(cm) : (%d, %d) ", original_position[0], original_position[1]);
-    HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), 100);
-
-
-    // correction to coordinates on path
-    correction(original_position, position);
-    sprintf(str, "---> (%d, %d)\r\n", position[0],position[1]);
-    HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), 100);
-
-    osDelay(5000);
+    // xSemaphoreTake가 대기 역할을 하므로 osDelay()는 필요 없습니다.
   }
   /* USER CODE END StartUWB */
 }
@@ -1210,7 +1236,7 @@ void StartPathPlanning(void *argument)
   for(;;)
   {
     if(HAL_UART_Transmit(&huart1, (uint8_t*)"\r\n---- PathPlanning ----\r\n", 28, 100) != HAL_OK){
-    Error_Handler();
+      Error_Handler();
     }
     // 5-2. 최적의 주차 공간 탐색 및 경로 계획
     // find_preferred_parking: 사용자 선호도에 따라 최적의 빈 주차 공간(goal)을 탐색
@@ -1221,7 +1247,7 @@ void StartPathPlanning(void *argument)
     // ★ TouchGFX Model로 추천 좌표 전달
     gui_update_recommended_parking((int)goal[0], (int)goal[1]); // 수정된 코드
     gui_update_path_points((uint8_t*)path, path_length);
-    osDelay(5000);
+    osDelay(1000);
   }
   /* USER CODE END StartPathPlanning */
 }
@@ -1239,13 +1265,13 @@ void StartPrintDebug(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    if(HAL_UART_Transmit(&huart1, (uint8_t*)"\r\n-------- GUI --------\r\n", 28, 100) != HAL_OK){
-    Error_Handler();
+    if(HAL_UART_Transmit(&huart1, (uint8_t*)"\r\n-------- Print Debug --------\r\n", 35, 100) != HAL_OK){
+      Error_Handler();
     }
 
     // 5-3. 결과 출력 (향후 GUI로 대체될 부분)
 
-    // 현재위치 출력
+    // 위치 출력
     sprintf(str, "position: (%d, %d)\r\n", position[0], position[1]);
     HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), 100);
 
@@ -1268,6 +1294,33 @@ void StartPrintDebug(void *argument)
     osDelay(3000);
   }
   /* USER CODE END StartPrintDebug */
+}
+
+/* USER CODE BEGIN Header_StartServer */
+/**
+* @brief Function implementing the Server thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartServer */
+void StartServer(void *argument)
+{
+  /* USER CODE BEGIN StartServer */
+  /* Infinite loop */
+  for(;;)
+  {
+    if(HAL_UART_Transmit(&huart1, (uint8_t*)"\r\n---- Server begin ----\r\n", 26, 100) != HAL_OK){
+      Error_Handler();
+    }
+    // 점유정보 받아오기
+    update_parking_occupancy(map_matrix);
+
+    if(HAL_UART_Transmit(&huart1, (uint8_t*)"\r\n----- Server end -----\r\n", 26, 100) != HAL_OK){
+      Error_Handler();
+    }
+    osDelay(3000);
+  }
+  /* USER CODE END StartServer */
 }
 
  /* MPU Configuration */
