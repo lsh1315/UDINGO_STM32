@@ -1,0 +1,1323 @@
+{
+  "Application": {
+    "Screens": [
+      {
+        "Name": "Screen1",
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "image1",
+            "Width": 480,
+            "Height": 272,
+            "RelativeFilename": "test3.png"
+          },
+          {
+            "Type": "ButtonWithIcon",
+            "Name": "button1",
+            "X": 75,
+            "Y": 94,
+            "Width": 60,
+            "Height": 60,
+            "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_rounded_tiny_fill_normal.png",
+            "Released": "__generated\\alternate_theme_images_widgets_button_icon_rounded_tiny_fill_normal.png",
+            "IconPressed": "__generated\\icon_theme_images_action_done_50_50_E8F6FB.svg.png",
+            "IconReleased": "__generated\\icon_theme_images_action_accessible_50_50_E8F6FB.svg.png",
+            "IconX": 5,
+            "IconY": 5,
+            "IconHeight": 50,
+            "IconWidth": 50
+          },
+          {
+            "Type": "ButtonWithIcon",
+            "Name": "button3",
+            "X": 75,
+            "Y": 163,
+            "Width": 60,
+            "Height": 60,
+            "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_rounded_tiny_fill_normal.png",
+            "Released": "__generated\\alternate_theme_images_widgets_button_icon_rounded_tiny_fill_normal.png",
+            "IconPressed": "small.png",
+            "IconReleased": "small.png",
+            "IconX": -1,
+            "IconY": -8,
+            "IconHeight": 64,
+            "IconWidth": 64
+          },
+          {
+            "Type": "ButtonWithIcon",
+            "Name": "button4",
+            "X": 147,
+            "Y": 163,
+            "Width": 60,
+            "Height": 60,
+            "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_rounded_tiny_fill_normal.png",
+            "Released": "__generated\\alternate_theme_images_widgets_button_icon_rounded_tiny_fill_normal.png",
+            "IconPressed": "car.png",
+            "IconReleased": "car.png",
+            "IconX": -1,
+            "IconY": -1,
+            "IconHeight": 64,
+            "IconWidth": 64
+          },
+          {
+            "Type": "ButtonWithIcon",
+            "Name": "button2",
+            "X": 147,
+            "Y": 94,
+            "Width": 60,
+            "Height": 60,
+            "Pressed": "__generated\\alternate_theme_images_widgets_button_icon_rounded_tiny_fill_normal.png",
+            "Released": "__generated\\alternate_theme_images_widgets_button_icon_rounded_tiny_fill_normal.png",
+            "IconPressed": "__generated\\icon_theme_images_action_done_50_50_E8F6FB.svg.png",
+            "IconReleased": "__generated\\icon_theme_images_maps_electric_car_50_50_E8F6FB.svg.png",
+            "IconX": 5,
+            "IconY": 5,
+            "IconHeight": 50,
+            "IconWidth": 50
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "HasCompletedTrigger": true,
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "button1"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "button1Clicked"
+            }
+          },
+          {
+            "InteractionName": "Interaction2",
+            "HasCompletedTrigger": true,
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "button2"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "button2Clicked"
+            }
+          },
+          {
+            "InteractionName": "Interaction3",
+            "HasCompletedTrigger": true,
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "button3"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "button3Clicked"
+            }
+          },
+          {
+            "InteractionName": "Interaction4",
+            "HasCompletedTrigger": true,
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "button4"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "button4Clicked"
+            }
+          },
+          {
+            "InteractionName": "Interaction5",
+            "HasCompletedTrigger": true,
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "button2"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Screen2"
+            }
+          },
+          {
+            "InteractionName": "Interaction6",
+            "HasCompletedTrigger": true,
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "button4"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Screen2"
+            }
+          },
+          {
+            "InteractionName": "Interaction7",
+            "HasCompletedTrigger": true,
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "button3"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Screen2"
+            }
+          },
+          {
+            "InteractionName": "Interaction8",
+            "HasCompletedTrigger": true,
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "button1"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Screen2"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Screen2",
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "image1",
+            "Width": 480,
+            "Height": 272,
+            "RelativeFilename": "Bear2.png"
+          },
+          {
+            "Type": "FlexButton",
+            "Name": "button2_1",
+            "X": 72,
+            "Y": 93,
+            "Width": 148,
+            "Height": 35,
+            "ButtonTrigger": {
+              "Type": "ClickButtonTrigger"
+            },
+            "ButtonStyles": [
+              {
+                "Type": "TextButtonStyle",
+                "Y": 4,
+                "TextId": "__SingleUse_JXFX",
+                "TextRotation": "0",
+                "ColorReleased": {
+                  "Red": 255,
+                  "Green": 255,
+                  "Blue": 255
+                },
+                "ColorPressed": {
+                  "Red": 10,
+                  "Green": 10,
+                  "Blue": 10
+                }
+              },
+              {
+                "Type": "BoxWithBorderButtonStyle",
+                "Width": 148,
+                "Height": 35,
+                "BorderSize": 1,
+                "ColorReleased": {
+                  "Red": 112,
+                  "Green": 177,
+                  "Blue": 186
+                },
+                "ColorPressed": {
+                  "Green": 153,
+                  "Blue": 204
+                },
+                "ColorBorderReleased": {
+                  "Red": 143,
+                  "Green": 204,
+                  "Blue": 200
+                },
+                "ColorBorderPressed": {
+                  "Red": 51,
+                  "Green": 102,
+                  "Blue": 153
+                }
+              }
+            ]
+          },
+          {
+            "Type": "FlexButton",
+            "Name": "button2_3",
+            "X": 72,
+            "Y": 187,
+            "Width": 148,
+            "Height": 35,
+            "ButtonTrigger": {
+              "Type": "ClickButtonTrigger"
+            },
+            "ButtonStyles": [
+              {
+                "Type": "TextButtonStyle",
+                "Y": 4,
+                "TextId": "__SingleUse_JI53",
+                "TextRotation": "0",
+                "ColorReleased": {
+                  "Red": 255,
+                  "Green": 255,
+                  "Blue": 255
+                },
+                "ColorPressed": {
+                  "Red": 10,
+                  "Green": 10,
+                  "Blue": 10
+                }
+              },
+              {
+                "Type": "BoxWithBorderButtonStyle",
+                "Width": 148,
+                "Height": 35,
+                "BorderSize": 1,
+                "ColorReleased": {
+                  "Red": 112,
+                  "Green": 177,
+                  "Blue": 186
+                },
+                "ColorPressed": {
+                  "Green": 153,
+                  "Blue": 204
+                },
+                "ColorBorderReleased": {
+                  "Red": 143,
+                  "Green": 204,
+                  "Blue": 200
+                },
+                "ColorBorderPressed": {
+                  "Red": 51,
+                  "Green": 102,
+                  "Blue": 153
+                }
+              }
+            ]
+          },
+          {
+            "Type": "FlexButton",
+            "Name": "button2_2",
+            "X": 72,
+            "Y": 142,
+            "Width": 148,
+            "Height": 35,
+            "ButtonTrigger": {
+              "Type": "ClickButtonTrigger"
+            },
+            "ButtonStyles": [
+              {
+                "Type": "TextButtonStyle",
+                "Y": 4,
+                "TextId": "__SingleUse_W3NL",
+                "TextRotation": "0",
+                "ColorReleased": {
+                  "Red": 255,
+                  "Green": 255,
+                  "Blue": 255
+                },
+                "ColorPressed": {
+                  "Red": 10,
+                  "Green": 10,
+                  "Blue": 10
+                }
+              },
+              {
+                "Type": "BoxWithBorderButtonStyle",
+                "Width": 148,
+                "Height": 35,
+                "BorderSize": 1,
+                "ColorReleased": {
+                  "Red": 112,
+                  "Green": 177,
+                  "Blue": 186
+                },
+                "ColorPressed": {
+                  "Green": 153,
+                  "Blue": 204
+                },
+                "ColorBorderReleased": {
+                  "Red": 143,
+                  "Green": 204,
+                  "Blue": 200
+                },
+                "ColorBorderPressed": {
+                  "Red": 51,
+                  "Green": 102,
+                  "Blue": 153
+                }
+              }
+            ]
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "HasCompletedTrigger": true,
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "button2_1"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "button2_1Clicked"
+            }
+          },
+          {
+            "InteractionName": "Interaction2",
+            "HasCompletedTrigger": true,
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "button2_2"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "button2_2Clicked"
+            }
+          },
+          {
+            "InteractionName": "Interaction3",
+            "HasCompletedTrigger": true,
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "button2_3"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "button2_3Clicked"
+            }
+          },
+          {
+            "InteractionName": "Interaction4",
+            "HasCompletedTrigger": true,
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "button2_1"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Screen3"
+            }
+          },
+          {
+            "InteractionName": "Interaction5",
+            "HasCompletedTrigger": true,
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "button2_2"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Screen3"
+            }
+          },
+          {
+            "InteractionName": "Interaction6",
+            "HasCompletedTrigger": true,
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "button2_3"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionNone",
+              "ActionComponent": "Screen3"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Screen3",
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "image1",
+            "Width": 480,
+            "Height": 272,
+            "RelativeFilename": "map.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "recommendedParkingMarker",
+            "X": 110,
+            "Y": 47,
+            "Width": 24,
+            "Height": 24,
+            "Visible": false,
+            "RelativeFilename": "dot.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_0",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_1",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_2",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_3",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_4",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_5",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_6",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_7",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_8",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_9",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_10",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_11",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_12",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_13",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_14",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_15",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_16",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_17",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_18",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_19",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_20",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_21",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_22",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_23",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_24",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_25",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_26",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_27",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_28",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_29",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_30",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_31",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_32",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_33",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_34",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_35",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_36",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_37",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_38",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_39",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_40",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_41",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_42",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_43",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_44",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_45",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_46",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_47",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_48",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_49",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_50",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_51",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_52",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_53",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_54",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_55",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_56",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_57",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_58",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_59",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_60",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_61",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_62",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_63",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_64",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_65",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_66",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_67",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_68",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_69",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_70",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_71",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_72",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_73",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_74",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_75",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_76",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_77",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_78",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_79",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_80",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_81",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_82",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_83",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_84",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_85",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_86",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_87",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_88",
+            "X": 103,
+            "Y": 69,
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_89",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_90",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_91",
+            "X": 87,
+            "Y": 37,
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_92",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_93",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_94",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_95",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_96",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_97",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_98",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_99",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          }
+        ],
+        "Interactions": []
+      }
+    ],
+    "CustomContainerDefinitions": [],
+    "Name": "UDINGO",
+    "Resolution": {
+      "Width": 480,
+      "Height": 272
+    },
+    "SelectedColorDepth": 24,
+    "StartupScreenName": "Screen1",
+    "SelectedStartupLanguage": "GB",
+    "TouchGfxPath": "../Middlewares/ST/touchgfx",
+    "UIPath": ".",
+    "AvailableColorDepths": [
+      24
+    ],
+    "AvailableLCDs": {
+      "24": "LCD24bpp"
+    },
+    "AvailableSections": [
+      "ExtFlashSection",
+      "IntFlashSection"
+    ],
+    "AvailableResolutions": [
+      {
+        "Width": 480,
+        "Height": 272
+      }
+    ],
+    "PhysicalButtons": [],
+    "FrameworkFeatures": {
+      "LCD24bpp": {
+        "Id": "LCD24bpp",
+        "IsEnabled": true
+      }
+    },
+    "GenerateAssetsCommand": "make -f simulator/gcc/Makefile assets -j8",
+    "PostGenerateCommand": "touchgfx update_project --project-file=simulator/msvs/Application.vcxproj",
+    "PostGenerateTargetCommand": "touchgfx update_project",
+    "CompileSimulatorCommand": "make -f simulator/gcc/Makefile -j8",
+    "RunSimulatorCommand": "build\\bin\\simulator.exe",
+    "CompileTargetCommandOverride": "make -f ../gcc/Makefile -j8",
+    "FlashTargetCommandOverride": "make -f ../gcc/Makefile flash",
+    "FlashTargetIntCommandOverride": "make -f ../gcc/Makefile intflash",
+    "LandscapeSkinX": 0,
+    "LandscapeSkinY": 0,
+    "PortraitSkinX": 0,
+    "PortraitSkinY": 0,
+    "DisplayOrientation": "Landscape",
+    "Family": "STM32H7",
+    "SubFamily": "STM32H7A3/7B3",
+    "Toolchain": "STM32CubeIDE",
+    "Platform": "m7",
+    "ProjectFile": "../STM32H7B3I-DK.ioc",
+    "OptionalComponentsRoot": "../Middlewares/ST/touchgfx_components",
+    "OptionalComponents": [],
+    "AdditionalFeatures": [
+      "CWRVector",
+      "VectorFonts",
+      "Video"
+    ]
+  },
+  "Version": "4.25.0",
+  "CreatedBy": "4.25.0"
+}
