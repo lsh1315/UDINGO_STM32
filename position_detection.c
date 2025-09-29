@@ -5,6 +5,9 @@
 #include <stdint.h>
 
 #define RX_BUFFER_SIZE 128 // 버퍼 크기는 넉넉하게 설정
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+
 extern uint8_t rx_buffer[RX_BUFFER_SIZE]; // 수신 데이터를 저장할 버퍼
 
 // Function to calculate the position using trilateration
@@ -107,59 +110,53 @@ int receive_dwm1000_distances(int distances[4]){
     return 1;
 }
 
-void correction(uint8_t original_position[2], uint8_t position[2]){
-    int row = original_position[0];
-    int col = original_position[1];
+void correction(uint8_t original_position[2], uint8_t corrected_position[2]) {
+    // 직사각형의 경계 정의
+    const uint8_t x_min = 9;
+    const uint8_t y_min = 24;
+    const uint8_t x_max = 54;
+    const uint8_t y_max = 94;
 
-    if (row <= 9){
-        if(col <= 24){
-            row = 9;
-            col = 24;
-        }else if(col >24 && col <94){
-            row = 9;
-        }else{
-            row = 9;
-            col = 94;
-        }
-    }else if(row > 9 && row < 54){
-        if(col <= 24){
-            col = 24;
-        }else if(col<row+13 && col<76-row && col>24){
-            col = 24;
-        }else if(row<30 && col>row+15 && col>101-row){
-            row = 9;
-        }else if(col>105-row && col>row+42 && col<94){
-            col = 94;
-        }else if(col >= 94){
-            col = 94;
-        }else if(row>33 && col<80-row && col<row+38){
-            row = 54;
-        }else{
-            return;
-        }
-    }else if(row>=54 && row<60){
-        if(col<=24){
-            row = 54;
-            col = 24;
-        }else if(col>24 && col<94){
-            row = 54;
-        }else{
-            row = 54;
-            col = 94;
-        }
-    }else{
-      return;
+    // 1단계: 점을 직사각형 영역 안으로 제한 (Clamping)
+    uint8_t clamped_x = MAX(x_min, MIN(original_position[0], x_max));
+    uint8_t clamped_y = MAX(y_min, MIN(original_position[1], y_max));
+
+    // 2단계: 제한된 점에서 네 변까지의 거리를 계산
+    uint8_t dist_to_left = clamped_x - x_min;
+    uint8_t dist_to_right = x_max - clamped_x;
+    uint8_t dist_to_top = clamped_y - y_min;
+    uint8_t dist_to_bottom = y_max - clamped_y;
+
+    // 3단계: 가장 짧은 거리를 찾기
+    uint8_t min_dist = dist_to_left;
+    if (dist_to_right < min_dist) min_dist = dist_to_right;
+    if (dist_to_top < min_dist) min_dist = dist_to_top;
+    if (dist_to_bottom < min_dist) min_dist = dist_to_bottom;
+
+    // 4단계: 가장 가까운 변으로 투영하여 결과를 output 파라미터에 저장
+    if (min_dist == dist_to_left) {
+        corrected_position[0] = x_min;
+        corrected_position[1] = clamped_y;
+    } else if (min_dist == dist_to_right) {
+        corrected_position[0] = x_max;
+        corrected_position[1] = clamped_y;
+    } else if (min_dist == dist_to_top) {
+        corrected_position[0] = clamped_x;
+        corrected_position[1] = y_min;
+    } else { // min_dist == dist_to_bottom
+        corrected_position[0] = clamped_x;
+        corrected_position[1] = y_max;
     }
-
-    position[0] = row;
-    position[1] = col;
 }
 
+
 int update_current_position(uint8_t* position) {
-    int distances[4] = {0,};
+    int distances[4];
     uint8_t original_position[2];
 
     receive_dwm1000_distances(distances);
+    // Debuging
+    // printf("%dmm | %dmm | %dmm | %dmm \n",distances[0],distances[1],distances[2],distances[3]);
 
     trilaterate(distances, original_position);
 
