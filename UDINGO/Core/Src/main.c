@@ -43,7 +43,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define ARRAY_CAPACITY 130
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -106,15 +106,8 @@ const osThreadAttr_t UWB_attributes = {
 osThreadId_t PathPlanningHandle;
 const osThreadAttr_t PathPlanning_attributes = {
   .name = "PathPlanning",
-  .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityBelowNormal,
-};
-/* Definitions for PrintDebug */
-osThreadId_t PrintDebugHandle;
-const osThreadAttr_t PrintDebug_attributes = {
-  .name = "PrintDebug",
   .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityBelowNormal,
 };
 /* Definitions for Server */
 osThreadId_t ServerHandle;
@@ -138,22 +131,20 @@ uint8_t user_preference[2];             // 사용자 선호도: [주차 구역 �
                                         // 유형: 2(경차), 3(장애인), 4(일반), 5(전기차)
                                         // 기준: 1(입구 근처), 2(출구 근처), 3(마트 출입구 근처)
 uint8_t position[2] = {54,24};                    // 현재 차량의 위치 [행, 열]
-uint8_t path[100][2];        // A* 알고리즘으로 계산된 최적 경로를 저장하는 배열
+uint8_t path[ARRAY_CAPACITY][2];        // A* 알고리즘으로 계산된 최적 경로를 저장하는 배열
 uint8_t path_length;                    // 최적 경로의 길이
 uint8_t goal[2];                        // 최종 목적지 주차 공간의 좌표 [행, 열]
 
 typedef enum {
-    STATE_WAIT_FIRST_CR,  // 첫 번째 '\r'을 기다리는 상태
-    STATE_WAIT_FIRST_LF,  // 첫 번째 '\n'을 기다리는 상태
-    STATE_CAPTURING,      // 데이터 캡처(저장) 중인 상태
-    STATE_WAIT_SECOND_CR  // 두 번째 '\r'을 기다리는 상태
-} ReceiveState;
+    STATE_IDLE,         // 시작 문자('\r')를 기다리는 상태
+    STATE_CAPTURING     // 종료 문자('\n')를 기다리며 데이터를 수신하는 상태
+} RxState;
 
 #define RX_BUFFER_SIZE 128 // 버퍼 크기는 넉넉하게 설정
 uint8_t rx_data; // 1바이트 수신 데이터 임시 저장 변수
 uint8_t rx_buffer[RX_BUFFER_SIZE]; // 수신 데이터를 저장할 버퍼
 volatile uint16_t rx_index = 0; // 버퍼의 현재 위치 (volatile 키워드 추가)
-volatile ReceiveState rx_state = STATE_WAIT_FIRST_CR; // 현재 수신 상태 (초기 상태)
+volatile RxState rx_state = STATE_IDLE; // 현재 수신 상태 (초기 상태)
 volatile uint8_t data_ready = 0; // 데이터 수신 완료 플래그
 
 SemaphoreHandle_t uart4RxSemaphore; // 세마포어 핸들 선언
@@ -180,7 +171,6 @@ extern void TouchGFX_Task(void *argument);
 extern void videoTaskFunc(void *argument);
 void StartUWB(void *argument);
 void StartPathPlanning(void *argument);
-void StartPrintDebug(void *argument);
 void StartServer(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -357,9 +347,6 @@ int main(void)
 
   /* creation of PathPlanning */
   PathPlanningHandle = osThreadNew(StartPathPlanning, NULL, &PathPlanning_attributes);
-
-  /* creation of PrintDebug */
-  PrintDebugHandle = osThreadNew(StartPrintDebug, NULL, &PrintDebug_attributes);
 
   /* creation of Server */
   ServerHandle = osThreadNew(StartServer, NULL, &Server_attributes);
@@ -1026,78 +1013,60 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-/* USER CODE BEGIN 4 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-    if(huart->Instance == UART4)
+    if (huart->Instance == UART4)
     {
         switch(rx_state)
         {
-            case STATE_WAIT_FIRST_CR: // 1. 첫 번째 '\r'을 기다림
-                if(rx_data == '\r')
+            // 1. 시작 문자('\r')를 기다리는 상태
+            case STATE_IDLE:
+                if (rx_data == '\r')
                 {
-                    rx_state = STATE_WAIT_FIRST_LF; // '\r'을 만나면 다음 상태로 전환
+                    rx_index = 0; // 버퍼 인덱스 초기화
+                    rx_state = STATE_CAPTURING; // 데이터 수신 상태로 변경
                 }
                 break;
 
-            case STATE_WAIT_FIRST_LF: // 2. 첫 번째 '\n'을 기다림
-                if(rx_data == '\n')
-                {
-                    rx_index = 0; // 인덱스 초기화
-                    rx_state = STATE_CAPTURING; // '\n'을 만나면 데이터 캡처 시작
-                }
-                else
-                {
-                    // '\r' 다음에 '\n'이 오지 않았으므로 다시 초기 상태로 리셋
-                    rx_state = STATE_WAIT_FIRST_CR;
-                }
-                break;
-
-            case STATE_CAPTURING: // 3. 데이터 캡처 중
-                if(rx_data == '\r')
-                {
-                    // 종료 '\r'일 수 있으므로 다음 상태로 전환
-                    rx_state = STATE_WAIT_SECOND_CR;
-                }
-                else if (rx_index < RX_BUFFER_SIZE - 1) // 버퍼 오버플로우 방지
-                {
-                    rx_buffer[rx_index++] = rx_data; // 버퍼에 데이터 저장
-                }
-                break;
-
-            case STATE_WAIT_SECOND_CR: // 4. 두 번째 '\n'을 기다림
-                if(rx_data == '\n') // 두 번째 '\n'을 만나면 수신 완료
+            // 2. 데이터를 수신하는 상태
+            case STATE_CAPTURING:
+                // 종료 문자('\n')를 만난 경우
+                if (rx_data == '\n')
                 {
                     rx_buffer[rx_index] = '\0'; // 문자열의 끝에 NULL 추가
 
-                    // 태스크를 깨우기 위해 세마포어 반납
+                    // 데이터 처리를 위해 태스크를 깨우는 세마포어 전달
                     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
                     xSemaphoreGiveFromISR(uart4RxSemaphore, &xHigherPriorityTaskWoken);
                     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 
-                    // 모든 과정이 끝났으므로 다시 초기 상태로
-                    rx_state = STATE_WAIT_FIRST_CR;
+                    // 다시 초기 상태로 복귀
+                    rx_state = STATE_IDLE;
                 }
-                else // '\r' 다음에 '\n'이 아니라 다른 문자가 온 경우
+                // 아직 데이터 수신 중인 경우
+                else
                 {
-                    // 이전에 '\r'로 판단했던 문자를 다시 버퍼에 저장
-                    if (rx_index < RX_BUFFER_SIZE - 1) {
-                        rx_buffer[rx_index++] = '\r';
+                    // 버퍼 오버플로우 방지
+                    if (rx_index < RX_BUFFER_SIZE - 1)
+                    {
+                        rx_buffer[rx_index++] = rx_data; // 버퍼에 데이터 저장
                     }
-                    // 현재 수신된 문자도 버퍼에 저장
-                    if (rx_index < RX_BUFFER_SIZE - 1) {
-                        rx_buffer[rx_index++] = rx_data;
+                    else
+                    {
+                        // 버퍼가 가득 찼다면 오류 처리 후 초기 상태로 리셋
+                        // (예: 로그 출력, 버퍼 비우기 등)
+                        rx_state = STATE_IDLE;
                     }
-                    // 다시 캡처 상태로 복귀
-                    rx_state = STATE_CAPTURING;
                 }
                 break;
         }
 
-        // 다음 1바이트 수신을 위해 인터럽트를 다시 활성화
+        // 다음 1바이트 수신을 위해 인터럽트 재활성화
         HAL_UART_Receive_IT(&huart4, &rx_data, 1);
     }
 }
+/* USER CODE BEGIN 4 */
+
 
 static void SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram, FMC_SDRAM_CommandTypeDef *Command)
 {
@@ -1244,56 +1213,14 @@ void StartPathPlanning(void *argument)
     // 경로의 길이를 반환하며, goal과 path는 전역변수에 저장됨
     find_preferred_parking(user_preference, map_matrix, map_rows, map_cols, goal);
     path_length = astar(position, goal, map_matrix, map_rows, map_cols, path);
+    sprintf(str, "path_length : %d\r\n", path_length);
+    HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), 100);
     // ★ TouchGFX Model로 추천 좌표 전달
     gui_update_recommended_parking((int)goal[0], (int)goal[1]); // 수정된 코드
     gui_update_path_points((uint8_t*)path, path_length);
     osDelay(1000);
   }
   /* USER CODE END StartPathPlanning */
-}
-
-/* USER CODE BEGIN Header_StartPrintDebug */
-/**
-* @brief Function implementing the PrintDebug thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartPrintDebug */
-void StartPrintDebug(void *argument)
-{
-  /* USER CODE BEGIN StartPrintDebug */
-  /* Infinite loop */
-  for(;;)
-  {
-    if(HAL_UART_Transmit(&huart1, (uint8_t*)"\r\n-------- Print Debug --------\r\n", 35, 100) != HAL_OK){
-      Error_Handler();
-    }
-
-    // 5-3. 결과 출력 (향후 GUI로 대체될 부분)
-
-    // 위치 출력
-    sprintf(str, "position: (%d, %d)\r\n", position[0], position[1]);
-    HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), 100);
-
-    // 목적지 출력
-    sprintf(str, "goal: (%d, %d)\r\n", goal[0], goal[1]);
-    HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), 100);
-
-    // 경로 출력
-    sprintf(str, "path:\r\n");
-    HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), 100);
-
-    for(int i = 0; i < path_length; i++) {
-      sprintf(str, "(%d, %d) -> ", path[i][0], path[i][1]);
-      HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), 100);
-    }
-
-    sprintf(str, "end!\r\n");
-    HAL_UART_Transmit(&huart1, (uint8_t*)str, strlen(str), 100);
-
-    osDelay(3000);
-  }
-  /* USER CODE END StartPrintDebug */
 }
 
 /* USER CODE BEGIN Header_StartServer */

@@ -815,6 +815,31 @@
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_car.cpp</locationURI>
 		</link>
 		<link>
+			<name>Application/User/generated/image_car_0.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_car_0.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/generated/image_car_180.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_car_180.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/generated/image_car_270.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_car_270.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/generated/image_car_90.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_car_90.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/generated/image_car_red.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_car_red.cpp</locationURI>
+		</link>
+		<link>
 			<name>Application/User/generated/image_dot.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_dot.cpp</locationURI>

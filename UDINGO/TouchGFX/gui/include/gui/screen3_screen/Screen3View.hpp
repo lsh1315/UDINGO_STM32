@@ -25,6 +25,14 @@ protected:
     // ★ 3. Designer에서 추가한 40개의 Image 위젯을 가리킬 포인터 배열을 선언합니다.
     // 이 배열을 통해 코드에서 pathPoint_0, pathPoint_1, ... 위젯들을 쉽게 제어할 수 있습니다.
     touchgfx::Image* pathPointWidgets[Model::MAX_PATH_POINTS];
+    // ★ 이전 차량 위치를 저장할 변수
+    int prev_car_x;
+    int prev_car_y;
+    bool is_first_update;  // 첫 업데이트인지 확인
+
+    // ★ 차량 방향 판단 및 이미지 설정 함수
+    void updateCarDirection(int current_x, int current_y);
 };
+
 
 #endif // SCREEN3VIEW_HPP

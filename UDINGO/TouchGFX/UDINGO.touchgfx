@@ -460,6 +460,246 @@
           },
           {
             "Type": "Image",
+            "Name": "pathPoint_120",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_121",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_122",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_123",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_124",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_125",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_126",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_127",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_128",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_129",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_100",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_101",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_102",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_103",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_104",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_105",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_106",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_107",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_108",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_109",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_110",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_111",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_112",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_113",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_114",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_115",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_116",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_117",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_118",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "pathPoint_119",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
             "Name": "pathPoint_1",
             "Width": 16,
             "Height": 16,
@@ -964,6 +1204,14 @@
           },
           {
             "Type": "Image",
+            "Name": "pathPoint_70",
+            "Width": 16,
+            "Height": 16,
+            "Visible": false,
+            "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
             "Name": "pathPoint_64",
             "Width": 16,
             "Height": 16,
@@ -972,7 +1220,7 @@
           },
           {
             "Type": "Image",
-            "Name": "pathPoint_65",
+            "Name": "pathPoint_66",
             "Width": 16,
             "Height": 16,
             "Visible": false,
@@ -980,7 +1228,7 @@
           },
           {
             "Type": "Image",
-            "Name": "pathPoint_66",
+            "Name": "pathPoint_65",
             "Width": 16,
             "Height": 16,
             "Visible": false,
@@ -1012,14 +1260,6 @@
           },
           {
             "Type": "Image",
-            "Name": "pathPoint_70",
-            "Width": 16,
-            "Height": 16,
-            "Visible": false,
-            "RelativeFilename": "full-stop.png"
-          },
-          {
-            "Type": "Image",
             "Name": "pathPoint_71",
             "Width": 16,
             "Height": 16,
@@ -1028,7 +1268,7 @@
           },
           {
             "Type": "Image",
-            "Name": "pathPoint_72",
+            "Name": "pathPoint_73",
             "Width": 16,
             "Height": 16,
             "Visible": false,
@@ -1036,7 +1276,7 @@
           },
           {
             "Type": "Image",
-            "Name": "pathPoint_73",
+            "Name": "pathPoint_72",
             "Width": 16,
             "Height": 16,
             "Visible": false,
@@ -1253,6 +1493,46 @@
             "Height": 16,
             "Visible": false,
             "RelativeFilename": "full-stop.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "car0",
+            "X": 68,
+            "Y": 170,
+            "Width": 64,
+            "Height": 64,
+            "Visible": false,
+            "RelativeFilename": "car_0.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "car90",
+            "X": 68,
+            "Y": 20,
+            "Width": 64,
+            "Height": 64,
+            "Visible": false,
+            "RelativeFilename": "car_90.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "car180",
+            "X": 343,
+            "Y": 20,
+            "Width": 64,
+            "Height": 64,
+            "Visible": false,
+            "RelativeFilename": "car_180.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "car270",
+            "X": 208,
+            "Y": 208,
+            "Width": 64,
+            "Height": 64,
+            "Visible": false,
+            "RelativeFilename": "car_270.png"
           }
         ],
         "Interactions": []

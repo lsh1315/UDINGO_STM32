@@ -13,7 +13,7 @@ class Model
 {
 public:
     // 2. 코드 전체에서 사용할 최대 경로점 개수를 상수로 정의합니다.
-    static const int MAX_PATH_POINTS = 100;
+    static const int MAX_PATH_POINTS = 130;
 
     Model();
 

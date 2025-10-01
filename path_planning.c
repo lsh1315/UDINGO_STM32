@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdint.h>
 
-#define ARRAY_CAPACITY 100
+#define ARRAY_CAPACITY 130
 #define INF 65535 // f, g 값의 최대값 (uint16_t에 맞춤)
 
 // ---------- 상태 정의 ----------

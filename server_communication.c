@@ -102,37 +102,37 @@ static int Non_empty_spot_download(char* response)
     wifi_send_cmd_16bit("$$$\r");
     wifi_wait_ready();
     wifi_receive_response_16bit(response, 128);
-    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    //HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
     wifi_wait_ready();
     wifi_send_cmd_16bit("S1=10\r");
     wifi_wait_ready();
     wifi_receive_response_16bit(response, 128);
-    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    //HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
     wifi_wait_ready();
     wifi_send_cmd_16bit("C1=Dayeon\r\n");
     wifi_wait_ready();
     wifi_receive_response_16bit(response, 128);
-    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    //HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
     wifi_wait_ready();
     wifi_send_cmd_16bit("C2=12791279\r\n");
     wifi_wait_ready();
     wifi_receive_response_16bit(response, 128);
-    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    //HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
     wifi_wait_ready();
     wifi_send_cmd_16bit("C3=4\r\n");
     wifi_wait_ready();
     wifi_receive_response_16bit(response, 128);
-    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    //HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
     wifi_wait_ready();
     wifi_send_cmd_16bit("C4=1\r\n");
     wifi_wait_ready();
     wifi_receive_response_16bit(response, 128);
-    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    //HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
     wifi_wait_ready();
     wifi_send_cmd_16bit("C0\r\n");
@@ -143,25 +143,25 @@ static int Non_empty_spot_download(char* response)
     wifi_send_cmd_16bit("P0=0\r");  // 소켓 0 사용
     wifi_wait_ready();
     wifi_receive_response_16bit(response, 128);
-    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    //HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
 
     wifi_send_cmd_16bit("P1=0\r");  // TCP
     wifi_wait_ready();
     wifi_receive_response_16bit(response, MAX_RESPONSE_SIZE);
-    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    //HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
 
     wifi_send_cmd_16bit("P3=3.39.40.177\r");  // Remote IP
     wifi_wait_ready();
     wifi_receive_response_16bit(response, 128);
-    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    //HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
 
     wifi_send_cmd_16bit("P4=5000\r");  // Remote port
     wifi_wait_ready();
     wifi_receive_response_16bit(response, 128);
-    HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
+    //HAL_UART_Transmit(&huart1, (uint8_t*)response, strlen(response), 100);
 
 
 
